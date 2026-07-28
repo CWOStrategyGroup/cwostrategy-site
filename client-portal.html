@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal | CWO Strategy Group</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .invoice-pay-btn{display:inline-flex;align-items:center;gap:6px;background:#635BFF;color:#fff;
+      padding:8px 16px;border-radius:var(--radius-sm);font-size:.8rem;font-weight:600;
+      text-decoration:none;transition:all var(--transition)}
+    .invoice-pay-btn:hover{background:#5144d3;color:#fff}
+    canvas{touch-action:none;display:block}
+    .empty-state{text-align:center;padding:40px 24px;color:var(--text-muted);font-size:.875rem}
+    .sig-preview{max-width:300px;border:1px solid var(--border);border-radius:var(--radius);
+      background:var(--bg-surface);display:block;margin-top:12px}
+    .pw-strength{height:4px;border-radius:100px;margin-top:6px;transition:all .3s}
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled" role="navigation" aria-label="Client portal navigation">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__logo">
+      <span class="nav__logo-name">CWO Strategy Group</span>
+      <span class="nav__logo-tag">Client Portal</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:16px;margin-left:auto">
+      <span id="nav-user-name" style="font-size:.85rem;color:var(--text-muted)"></span>
+      <button class="btn btn--ghost btn--sm" id="logout-btn">Sign Out</button>
+    </div>
+    <button class="nav__hamburger" id="sidebar-toggle" aria-label="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen" class="portal-login">
+  <div class="portal-login__card">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--gold)">CWO Strategy Group</div>
+      <div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Client Portal</div>
+    </div>
+    <h1 class="portal-login__title">Welcome Back</h1>
+    <p class="portal-login__subtitle">Sign in to access your project dashboard, messages, invoices, and files.</p>
+    <div id="demo-notice" style="display:none;margin-bottom:20px;padding:12px 16px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius);font-size:.8rem;color:var(--gold)">
+      <strong>Demo Mode</strong> — Backend not configured. Use <strong>demo@example.com</strong> / <strong>demo123</strong>
+    </div>
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email Address</label>
+        <input type="email" id="login-email" class="form-input" placeholder="you@yourbusiness.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input type="password" id="login-password" class="form-input" placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <div id="login-error" style="display:none;color:var(--error);font-size:.85rem;margin-bottom:16px;padding:10px 14px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);border-radius:var(--radius-sm)"></div>
+      <button type="submit" class="btn btn--primary w-full" style="justify-content:center" id="login-btn">Sign In to Portal</button>
+    </form>
+    <p style="text-align:center;font-size:.8rem;color:var(--text-muted);margin-top:24px">
+      Need portal access? <a href="consultation.html">Book a consultation</a>
+    </p>
+  </div>
+</div>
+
+<!-- ══════════ PORTAL ══════════ -->
+<div id="portal-app" class="portal-layout hidden">
+  <div id="demo-bar" style="display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:998;
+    background:rgba(201,168,76,.12);border-bottom:1px solid rgba(201,168,76,.3);color:var(--gold);
+    font-size:.78rem;text-align:center;padding:7px 16px;font-family:Outfit,sans-serif;letter-spacing:.04em">
+    DEMO MODE — Connect backend by setting APPS_SCRIPT_URL in script.js
+  </div>
+
+  <aside class="portal-sidebar" id="portal-sidebar">
+    <div class="portal-sidebar__header">
+      <div class="portal-sidebar__user">
+        <div class="portal-sidebar__avatar" id="sidebar-avatar">??</div>
+        <div>
+          <div class="portal-sidebar__username" id="sidebar-name">Loading...</div>
+          <div class="portal-sidebar__role">Client Account</div>
+        </div>
+      </div>
+    </div>
+    <nav class="portal-nav">
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Overview</div>
+        <button class="portal-nav__item active" data-section="dashboard">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+        </button>
+        <button class="portal-nav__item" data-section="project">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Project Status
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Communication</div>
+        <button class="portal-nav__item" data-section="messages">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages
+          <span class="portal-nav__badge" id="msg-badge" style="display:none">!</span>
+        </button>
+        <button class="portal-nav__item" data-section="files">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Billing</div>
+        <button class="portal-nav__item" data-section="invoices">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Invoices
+          <span class="portal-nav__badge" id="inv-badge" style="display:none">!</span>
+        </button>
+        <button class="portal-nav__item" data-section="contract">
+          <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Contract
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">My Account</div>
+        <button class="portal-nav__item" data-section="reviews">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Leave a Review
+        </button>
+        <button class="portal-nav__item" data-section="referrals">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Referrals
+        </button>
+        <button class="portal-nav__item" data-section="account">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Account Settings
+        </button>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="portal-main" role="main">
+
+    <!-- ── Dashboard ─────────────────────────────────────────── -->
+    <div class="portal-section active" id="section-dashboard">
+      <div class="portal-header">
+        <h1 class="portal-title">Welcome back, <span id="welcome-name">—</span></h1>
+        <span id="dashboard-date" style="font-size:.85rem;color:var(--text-muted)"></span>
+      </div>
+      <div class="dashboard-grid">
+        <div class="widget"><div class="widget__label">Project Status</div><div class="widget__value" id="w-status">—</div><div class="widget__change up" id="w-stage">Loading...</div></div>
+        <div class="widget"><div class="widget__label">Plan</div><div class="widget__value" id="w-plan">—</div><div class="widget__change" style="color:var(--text-muted)">Service plan</div></div>
+        <div class="widget"><div class="widget__label">Unread Messages</div><div class="widget__value" id="w-msgs">0</div><div class="widget__change up">From your team</div></div>
+        <div class="widget" id="w-credit-widget"><div class="widget__label">Available Credit</div><div class="widget__value" id="w-credit">$0</div><div class="widget__change up" id="w-credit-note" style="display:none">Applied at next checkout</div></div>
+        <div class="widget" id="w-outstanding-widget" style="display:none"><div class="widget__label">Outstanding Balance</div><div class="widget__value" id="w-outstanding">$0</div><div class="widget__change" id="w-outstanding-note" style="color:var(--text-muted)">Unpaid invoices</div></div>
+      </div>
+      <!-- Payment success banner (shown after Stripe redirect) -->
+      <div id="payment-success-banner" style="display:none;padding:16px 20px;background:rgba(31,157,85,.08);border:1px solid rgba(31,157,85,.3);border-radius:var(--radius);margin-bottom:24px;align-items:center;gap:12px">
+        <svg width="20" height="20" viewBox="0 0 24 24" style="stroke:var(--success);fill:none;stroke-width:2.5;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+        <div>
+          <div style="font-weight:600;color:var(--success);font-size:.95rem">Payment Confirmed</div>
+          <div id="payment-success-text" style="font-size:.85rem;color:var(--text-secondary);margin-top:2px"></div>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Project Progress</div>
+        <div class="progress-tracker" id="dash-progress">
+          <div class="progress-step" data-step="1"><div class="progress-dot">1</div><div class="progress-label">Consultation</div></div>
+          <div class="progress-step" data-step="2"><div class="progress-dot">2</div><div class="progress-label">Onboarding</div></div>
+          <div class="progress-step" data-step="3"><div class="progress-dot">3</div><div class="progress-label">Design</div></div>
+          <div class="progress-step" data-step="4"><div class="progress-dot">4</div><div class="progress-label">Review</div></div>
+          <div class="progress-step" data-step="5"><div class="progress-dot">5</div><div class="progress-label">Launch</div></div>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Quick Actions</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+          <button class="btn btn--ghost" onclick="showSection('messages')"><svg width="15" height="15" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Send Message</button>
+          <button class="btn btn--ghost" onclick="showSection('files')"><svg width="15" height="15" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload File</button>
+          <button class="btn btn--ghost" onclick="showSection('invoices')"><svg width="15" height="15" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Invoices</button>
+          <button class="btn btn--ghost" onclick="showSection('referrals')"><svg width="15" height="15" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Refer a Friend</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Project Status ────────────────────────────────────── -->
+    <div class="portal-section" id="section-project">
+      <div class="portal-header"><h1 class="portal-title">Project Status</h1></div>
+      <div class="portal-card">
+        <div class="portal-card__title">Development Milestones</div>
+        <div class="progress-tracker" style="margin-bottom:40px" id="project-progress">
+          <div class="progress-step" data-step="1"><div class="progress-dot">1</div><div class="progress-label">Consultation</div></div>
+          <div class="progress-step" data-step="2"><div class="progress-dot">2</div><div class="progress-label">Onboarding</div></div>
+          <div class="progress-step" data-step="3"><div class="progress-dot">3</div><div class="progress-label">Design</div></div>
+          <div class="progress-step" data-step="4"><div class="progress-dot">4</div><div class="progress-label">Review</div></div>
+          <div class="progress-step" data-step="5"><div class="progress-dot">5</div><div class="progress-label">Launch</div></div>
+        </div>
+        <div id="milestones-info" style="font-size:.875rem;color:var(--text-secondary);padding:16px;background:var(--bg-surface);border-radius:var(--radius)">Loading project details...</div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Project Details</div>
+        <div class="grid-2" style="gap:24px">
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Service Plan</div><div style="color:var(--text);font-weight:500" id="proj-plan">—</div></div>
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Started</div><div style="color:var(--text);font-weight:500" id="proj-start">—</div></div>
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Assigned Team</div><div style="color:var(--text);font-weight:500">CWO Strategy Group</div></div>
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Current Stage</div><div id="proj-stage"><span class="badge badge--info">Loading...</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Messages ──────────────────────────────────────────── -->
+    <div class="portal-section" id="section-messages">
+      <div class="portal-header"><h1 class="portal-title">Messages</h1></div>
+      <div class="portal-card" style="padding:0">
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages"><div class="empty-state">Loading messages...</div></div>
+          <div class="chat-input-area">
+            <textarea class="chat-input" id="chat-input" placeholder="Type your message..." rows="1" aria-label="Message input"></textarea>
+            <button class="btn btn--primary btn--sm" id="send-msg-btn" aria-label="Send">
+              <svg width="14" height="14" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Files ─────────────────────────────────────────────── -->
+    <div class="portal-section" id="section-files">
+      <div class="portal-header"><h1 class="portal-title">Files</h1></div>
+      <div class="portal-card">
+        <div class="portal-card__title">Upload Files</div>
+        <div class="file-drop" id="file-drop-zone" role="button" tabindex="0" aria-label="Click or drag to upload files">
+          <svg viewBox="0 0 24 24" style="fill:none;stroke:var(--text-muted);stroke-width:1.5;width:40px;height:40px;margin:0 auto 12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Drag &amp; drop files here, or <span>click to browse</span></p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px">PDF, JPG, PNG, DOCX, ZIP — max 25MB</p>
+          <input type="file" id="file-input" style="display:none" multiple accept=".pdf,.jpg,.jpeg,.png,.docx,.zip,.doc,.xlsx">
+        </div>
+        <div id="upload-progress" style="display:none;margin-top:16px">
+          <div style="background:var(--border);border-radius:100px;height:4px;overflow:hidden"><div id="upload-bar" style="height:100%;background:var(--gold);width:0%;transition:width .4s ease;border-radius:100px"></div></div>
+          <p id="upload-label" style="font-size:.8rem;color:var(--text-muted);margin-top:8px">Uploading...</p>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">All Files <span id="files-count" style="font-size:.8rem;color:var(--text-muted);font-family:Outfit,sans-serif;font-weight:400"></span></div>
+        <table class="data-table" aria-label="Files">
+          <thead><tr><th>File Name</th><th>Type</th><th>Uploaded By</th><th>Date</th><th>Size</th><th>Action</th></tr></thead>
+          <tbody id="files-table"><tr><td colspan="6" class="empty-state">Loading files...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Invoices ───────────────────────────────────────────── -->
+    <div class="portal-section" id="section-invoices">
+      <div class="portal-header"><h1 class="portal-title">Invoices</h1></div>
+      <!-- Credit balance notice shown when client has credit -->
+      <div id="invoice-credit-notice" style="display:none;padding:14px 18px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius);margin-bottom:16px;display:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <svg width="18" height="18" viewBox="0 0 24 24" style="stroke:var(--success);fill:none;stroke-width:2;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div id="invoice-credit-notice-text" style="font-size:.875rem;color:var(--success)"></div>
+        </div>
+      </div>
+      <!-- Outstanding summary banner -->
+      <div id="invoice-outstanding-banner" style="display:none;padding:14px 18px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius);margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div style="font-size:.875rem;color:var(--gold)">
+            <strong id="invoice-outstanding-text"></strong>
+          </div>
+          <div id="invoice-overdue-badge" style="display:none">
+            <span style="font-size:.75rem;font-weight:700;padding:3px 10px;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);color:var(--error);border-radius:100px" id="invoice-overdue-text"></span>
+          </div>
+        </div>
+      </div>
+      <!-- Filter toolbar -->
+      <div class="portal-card" style="padding:14px 20px;margin-bottom:16px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:.8rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Filter:</span>
+          <button class="btn btn--ghost btn--sm inv-filter-btn active" data-filter="all">All</button>
+          <button class="btn btn--ghost btn--sm inv-filter-btn" data-filter="due">Unpaid</button>
+          <button class="btn btn--ghost btn--sm inv-filter-btn" data-filter="paid">Paid</button>
+          <button class="btn btn--ghost btn--sm inv-filter-btn" data-filter="overdue" id="inv-filter-overdue" style="display:none">Overdue</button>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Invoice History</div>
+        <table class="data-table" aria-label="Invoices">
+          <thead><tr><th>Invoice #</th><th>Description</th><th>Amount</th><th>Credit Applied</th><th>Status</th><th>Due Date</th><th>Action</th></tr></thead>
+          <tbody id="invoices-table"><tr><td colspan="7" class="empty-state">Loading invoices...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Contract ──────────────────────────────────────────── -->
+    <div class="portal-section" id="section-contract">
+      <div class="portal-header"><h1 class="portal-title">Service Contract</h1></div>
+      <div class="portal-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div class="portal-card__title" style="margin-bottom:0">Service Agreement</div>
+          <span id="contract-status-badge" class="badge badge--warning">Awaiting Signature</span>
+        </div>
+        <div class="contract-box" tabindex="0">
+          <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);margin-bottom:16px">CWO Strategy Group — Service Agreement</h3>
+          <p><strong style="color:var(--text)">This Agreement</strong> is entered into between <strong style="color:var(--text)">CWO Strategy Group</strong> ("Agency") and the undersigned client ("Client").</p><br>
+          <p><strong style="color:var(--text)">1. Scope of Services.</strong> Agency agrees to provide web design, development, and/or ongoing SEO services as outlined in the accepted proposal.</p><br>
+          <p><strong style="color:var(--text)">2. Payment Terms.</strong> The one-time website creation fee of $300 USD is due upon project commencement. Monthly plan fees of $50 USD are billed on the same calendar date each billing cycle. All payments processed securely via Stripe.</p><br>
+          <p><strong style="color:var(--text)">3. Intellectual Property.</strong> Upon full payment of the creation fee, Client owns all website content and design files. Agency retains portfolio display rights unless Client requests otherwise in writing within 30 days of project completion.</p><br>
+          <p><strong style="color:var(--text)">4. Revisions.</strong> Projects include up to two (2) rounds of design revisions. Additional revisions beyond this scope are billed at $75/hour.</p><br>
+          <p><strong style="color:var(--text)">5. Cancellation.</strong> Either party may cancel the monthly plan with 30 days written notice. The one-time creation fee is non-refundable after project work commences.</p><br>
+          <p><strong style="color:var(--text)">6. Limitation of Liability.</strong> Agency's total liability shall not exceed fees paid in the prior 30 days. Agency is not liable for ranking changes resulting from third-party platform updates.</p><br>
+          <p><strong style="color:var(--text)">7. Confidentiality.</strong> Both parties agree to maintain strict confidentiality of all proprietary information shared during the engagement.</p><br>
+          <p><strong style="color:var(--text)">8. Governing Law.</strong> This Agreement is governed by United States law. Disputes shall be resolved through binding arbitration.</p>
+        </div>
+
+        <!-- Sign section (hidden when already signed) -->
+        <div id="sign-section" style="margin-top:24px">
+          <div class="form-group">
+            <label class="form-label" for="signer-name">Full Legal Name <span style="color:var(--error)">*</span></label>
+            <input type="text" id="signer-name" class="form-input" placeholder="Type your full legal name" style="max-width:420px" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Draw Your Signature <span style="color:var(--error)">*</span></label>
+            <canvas id="signature-canvas" width="540" height="150"
+              style="border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-surface);cursor:crosshair;width:100%;max-width:540px"
+              aria-label="Signature drawing area"></canvas>
+            <button type="button" class="btn btn--ghost btn--sm" id="clear-sig-btn" style="margin-top:8px">Clear</button>
+          </div>
+          <div id="contract-error" style="display:none;color:var(--error);font-size:.85rem;margin-bottom:12px;padding:10px;background:rgba(231,76,60,.08);border-radius:var(--radius-sm)"></div>
+          <button type="button" class="btn btn--primary" id="sign-contract-btn">Sign &amp; Accept Agreement</button>
+          <p style="font-size:.8rem;color:var(--text-muted);margin-top:12px">By signing, you confirm you have read and agree to the terms above. A digital copy with your signature will be emailed to you and stored securely.</p>
+        </div>
+
+        <!-- Signed confirmation (shown after signing) -->
+        <div id="contract-signed-msg" style="display:none;padding:24px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:36px;height:36px;background:rgba(46,204,113,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" style="stroke:var(--success);fill:none;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <strong style="color:var(--success);font-size:1rem">Agreement Signed</strong>
+          </div>
+          <p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:8px">
+            Signed by <strong id="signed-by" style="color:var(--text)">—</strong> on <strong id="signed-date" style="color:var(--text)">—</strong>.
+            A confirmation email with a copy of your signed agreement has been sent to your email address.
+          </p>
+          <div id="sig-preview-wrap" style="display:none;margin-top:16px">
+            <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px">Recorded Signature</div>
+            <img id="sig-preview-img" class="sig-preview" alt="Your recorded signature">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Reviews ───────────────────────────────────────────── -->
+    <div class="portal-section" id="section-reviews">
+      <div class="portal-header"><h1 class="portal-title">Leave a Review</h1></div>
+      <div class="portal-card">
+        <p style="color:var(--text-secondary);margin-bottom:28px">Your feedback helps us improve and helps other business owners make informed decisions. Reviews are moderated before publishing.</p>
+        <form id="review-form" novalidate>
+          <div class="form-group">
+            <label class="form-label">Rating <span style="color:var(--error)">*</span></label>
+            <div id="star-rating-container" role="group" aria-label="Star rating"></div>
+            <input type="hidden" id="review-rating" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="review-title">Review Title <span style="color:var(--error)">*</span></label>
+            <input type="text" id="review-title" class="form-input" placeholder="Summarize your experience" required maxlength="100">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="review-body">Your Review <span style="color:var(--error)">*</span></label>
+            <textarea id="review-body" class="form-textarea" rows="5" placeholder="Share your experience..." required minlength="20"></textarea>
+          </div>
+          <div id="review-success" style="display:none;padding:16px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius);color:var(--success);margin-bottom:16px">Thank you. Your review will be published after approval.</div>
+          <button type="submit" class="btn btn--primary" id="review-submit-btn">Submit Review</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Referrals ──────────────────────────────────────────── -->
+    <div class="portal-section" id="section-referrals">
+      <div class="portal-header"><h1 class="portal-title">Referral Program</h1></div>
+      <div class="portal-card" style="margin-bottom:24px">
+        <span class="eyebrow" style="margin-bottom:20px">Earn $25 Per Referral</span>
+        <div id="ref-credit-notice" style="display:none;padding:12px 16px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius);font-size:.875rem;color:var(--success);margin-bottom:20px"></div>
+        <div class="grid-3" style="gap:16px;margin-bottom:28px">
+          <div style="text-align:center;padding:20px;background:var(--bg-surface);border-radius:var(--radius)"><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:8px">1</div><p style="font-size:.85rem">Share your code with a business contact</p></div>
+          <div style="text-align:center;padding:20px;background:var(--bg-surface);border-radius:var(--radius)"><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:8px">2</div><p style="font-size:.85rem">They mention your code when booking</p></div>
+          <div style="text-align:center;padding:20px;background:var(--bg-surface);border-radius:var(--radius)"><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--gold);margin-bottom:8px">3</div><p style="font-size:.85rem">Earn $25 account credit when they sign up</p></div>
+        </div>
+        <label class="form-label">Your Referral Code</label>
+        <div class="referral-code" id="referral-code-display" onclick="copyCode(this)" title="Click to copy" role="button" tabindex="0">—</div>
+        <p id="copy-feedback" style="font-size:.8rem;color:var(--success);margin-top:8px;min-height:1.2em"></p>
+        <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap">
+          <button class="btn btn--outline btn--sm" id="copy-code-btn">Copy Code</button>
+          <button class="btn btn--ghost btn--sm" id="share-email-btn">Share via Email</button>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Referral History &amp; Rewards</div>
+        <div class="grid-2" style="gap:16px;margin-bottom:24px">
+          <div class="widget"><div class="widget__label">Total Referred</div><div class="widget__value" id="ref-total">0</div></div>
+          <div class="widget"><div class="widget__label">Rewards Earned</div><div class="widget__value" id="ref-earned">$0</div></div>
+        </div>
+        <table class="data-table" aria-label="Referrals">
+          <thead><tr><th>Business</th><th>Date</th><th>Status</th><th>Reward</th></tr></thead>
+          <tbody id="referrals-table"><tr><td colspan="4" class="empty-state">No referrals yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Account Settings ──────────────────────────────────── -->
+    <div class="portal-section" id="section-account">
+      <div class="portal-header"><h1 class="portal-title">Account Settings</h1></div>
+
+      <div class="portal-card" style="max-width:500px;margin-bottom:24px">
+        <div class="portal-card__title">Account Information</div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Name</div><div style="color:var(--text);font-weight:500" id="acc-name">—</div></div>
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Email</div><div style="color:var(--text);font-weight:500" id="acc-email">—</div></div>
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Business</div><div style="color:var(--text);font-weight:500" id="acc-business">—</div></div>
+        </div>
+      </div>
+
+      <div class="portal-card" style="max-width:500px">
+        <div class="portal-card__title">Change Password</div>
+        <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:24px">
+          Choose a strong password of at least 8 characters. You will need to enter your current password to confirm the change.
+        </p>
+        <form id="pw-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="pw-current">Current Password <span style="color:var(--error)">*</span></label>
+            <input type="password" id="pw-current" class="form-input" style="max-width:360px" required autocomplete="current-password" placeholder="Your current password">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pw-new">New Password <span style="color:var(--error)">*</span></label>
+            <input type="password" id="pw-new" class="form-input" style="max-width:360px" required autocomplete="new-password" placeholder="At least 8 characters" minlength="8">
+            <div id="pw-strength-bar" class="pw-strength" style="max-width:360px;background:var(--border)"></div>
+            <div id="pw-strength-label" style="font-size:.75rem;color:var(--text-muted);margin-top:4px"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pw-confirm">Confirm New Password <span style="color:var(--error)">*</span></label>
+            <input type="password" id="pw-confirm" class="form-input" style="max-width:360px" required autocomplete="new-password" placeholder="Repeat new password">
+          </div>
+          <div id="pw-error" style="display:none;color:var(--error);font-size:.85rem;margin-bottom:12px;padding:10px;background:rgba(231,76,60,.08);border-radius:var(--radius-sm)"></div>
+          <div id="pw-success" style="display:none;color:var(--success);font-size:.875rem;margin-bottom:12px;padding:12px 16px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius)">Password updated successfully.</div>
+          <button type="submit" class="btn btn--primary" id="pw-submit-btn">Update Password</button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="script.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════
+//  Client Portal JS
+// ════════════════════════════════════════════════════════════════
+let currentUser  = null;
+let chatMessages = [];
+let uploadedFiles = [];
+let sigCtx = null, sigDrawing = false;
+let isDemoMode = false;
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])
+  );
+}
+
+// CORS fix: text/plain avoids preflight OPTIONS block
+async function portalApi(payload) {
+  if (isDemoMode) throw new Error('DEMO_MODE');
+  const url = (typeof CONFIG !== 'undefined' ? CONFIG.APPS_SCRIPT_URL : '') || '';
+  if (!url || url === 'YOUR_APPS_SCRIPT_URL_HERE') throw new Error('DEMO_MODE');
+  const res = await fetch(url, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch { throw new Error('Invalid server response'); }
+}
+
+function toast(msg, type = 'success') {
+  if (typeof showToast === 'function') return showToast(msg, type);
+}
+
+// ── Section nav ───────────────────────────────────────────────
+function showSection(id) {
+  document.querySelectorAll('.portal-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.portal-nav__item').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById('section-' + id);
+  const btn = document.querySelector(`.portal-nav__item[data-section="${id}"]`);
+  if (sec) sec.classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('portal-sidebar').classList.remove('mobile-open');
+}
+
+document.querySelectorAll('.portal-nav__item').forEach(btn => {
+  btn.addEventListener('click', () => showSection(btn.dataset.section));
+});
+document.getElementById('sidebar-toggle').addEventListener('click', () => {
+  document.getElementById('portal-sidebar').classList.toggle('mobile-open');
+});
+
+// ── Progress tracker ──────────────────────────────────────────
+const STAGE_ORDER = ['consultation','onboarding','design','review','launch','ongoing'];
+function updateProgress(stage) {
+  const idx = STAGE_ORDER.indexOf((stage || '').toLowerCase());
+  ['dash-progress','project-progress'].forEach(pid => {
+    document.querySelectorAll('#' + pid + ' .progress-step').forEach(step => {
+      const n = parseInt(step.dataset.step);
+      step.classList.remove('completed','active');
+      if (n - 1 < idx) step.classList.add('completed');
+      else if (n - 1 === idx) step.classList.add('active');
+    });
+  });
+}
+
+// ── Auth ─────────────────────────────────────────────────────
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const btn   = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+
+  if (typeof IS_DEMO_MODE !== 'undefined' && IS_DEMO_MODE) {
+    if (email === 'demo@example.com' && pass === 'demo123') {
+      isDemoMode = true;
+      const u = { id:'demo-1', name:'Demo Client', email:'demo@example.com',
+        business:'Your Business', plan:'growth', status:'active', referralCode:'CWREF-DEMO1' };
+      sessionStorage.setItem('cwo_client', JSON.stringify(u));
+      startSession(u);
+      return;
+    }
+    errEl.textContent = 'Use demo@example.com / demo123 in demo mode.';
+    errEl.style.display = 'block'; btn.textContent = 'Sign In to Portal'; btn.disabled = false;
+    return;
+  }
+
+  try {
+    const data = await portalApi({ action: 'clientLogin', email, password: pass });
+    if (data.success) {
+      sessionStorage.setItem('cwo_client', JSON.stringify(data.user));
+      startSession(data.user);
+    } else {
+      errEl.textContent = data.message || 'Invalid credentials.';
+      errEl.style.display = 'block'; btn.textContent = 'Sign In to Portal'; btn.disabled = false;
+    }
+  } catch (err) {
+    errEl.textContent = err.message === 'DEMO_MODE'
+      ? 'Backend not configured — use demo@example.com / demo123.'
+      : 'Cannot connect to server. Please try again.';
+    errEl.style.display = 'block'; btn.textContent = 'Sign In to Portal'; btn.disabled = false;
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('cwo_client'); location.reload();
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  isDemoMode = typeof IS_DEMO_MODE !== 'undefined' && IS_DEMO_MODE;
+  if (isDemoMode) document.getElementById('demo-notice').style.display = 'block';
+  const stored = sessionStorage.getItem('cwo_client');
+  if (stored) {
+    try { const u = JSON.parse(stored); startSession(u); } catch { sessionStorage.removeItem('cwo_client'); }
+  }
+});
+
+function startSession(user) {
+  currentUser = user;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('portal-app').classList.remove('hidden');
+  document.getElementById('nav-user-name').textContent = user.name;
+  document.getElementById('sidebar-avatar').textContent = ini(user.name);
+  document.getElementById('sidebar-name').textContent   = user.name;
+  document.getElementById('welcome-name').textContent   = user.name.split(' ')[0];
+  document.getElementById('dashboard-date').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('referral-code-display').textContent = user.referralCode || '—';
+
+  // Populate account info
+  document.getElementById('acc-name').textContent     = user.name;
+  document.getElementById('acc-email').textContent    = user.email;
+  document.getElementById('acc-business').textContent = user.business || '—';
+
+  // Stripe links
+  const sl = (typeof CONFIG !== 'undefined' ? CONFIG.STRIPE_MONTHLY_LINK : '') || '#';
+  document.querySelectorAll('.stripe-link').forEach(a => a.href = sl);
+
+  if (isDemoMode) document.getElementById('demo-bar').style.display = 'block';
+
+  // Load all data
+  loadClientData(user.id);
+  loadMessages(user.id);
+  loadFiles(user.id);
+  loadInvoices(user.id);   // also calls loadOutstandingBalance internally
+  loadReferrals(user.id);
+  loadContractStatus(user.id);   // syncs signed state from backend every login
+  applyPortalPageSettings(user.id); // hides admin-disabled sections
+
+  // Handle Stripe payment success redirect
+  setTimeout(() => handlePaymentSuccessParam(), 400);
+
+  initCanvas();
+  if (typeof buildStarRating === 'function') {
+    buildStarRating(document.getElementById('star-rating-container'), 'review-rating');
+  }
+}
+
+/**
+ * applyPortalPageSettings — loads disabled sections from the backend
+ * and hides the corresponding sidebar nav items and portal sections.
+ * If a disabled section is currently active, redirects to dashboard.
+ */
+async function applyPortalPageSettings(clientId) {
+  if (isDemoMode) return;
+  try {
+    const data = await portalApi({ action: 'getClientSettings', clientId });
+    if (!data.success) return;
+    const disabled = data.disabledSections || [];
+    if (!disabled.length) return;
+
+    disabled.forEach(sectionId => {
+      // Hide sidebar nav item
+      const navBtn = document.querySelector(`.portal-nav__item[data-section="${sectionId}"]`);
+      if (navBtn) navBtn.style.display = 'none';
+
+      // If this section is currently active, redirect to dashboard
+      const sec = document.getElementById('section-' + sectionId);
+      if (sec && sec.classList.contains('active')) {
+        showSection('dashboard');
+      }
+    });
+  } catch (err) {
+    console.warn('applyPortalPageSettings:', err.message);
+  }
+}
+
+function ini(n) { return String(n||'').split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2)||'??'; }
+
+// ── Load data from backend ────────────────────────────────────
+async function loadClientData(id) {
+  if (isDemoMode) {
+    document.getElementById('w-status').textContent = 'Active';
+    document.getElementById('w-stage').textContent  = 'Consultation';
+    document.getElementById('w-plan').textContent   = '$50/mo';
+    document.getElementById('proj-plan').textContent  = 'Monthly Growth Plan';
+    document.getElementById('proj-start').textContent = '—';
+    document.getElementById('proj-stage').innerHTML   = '<span class="badge badge--info">Consultation</span>';
+    document.getElementById('milestones-info').textContent = 'Project details will appear here once set up.';
+    updateProgress('consultation'); return;
+  }
+  try {
+    const data = await portalApi({ action: 'getClientData', clientId: id });
+    if (!data.success) return;
+    const c = data.client;
+    document.getElementById('w-status').textContent   = c.status || 'Active';
+    document.getElementById('w-stage').textContent    = c.stage  || '—';
+    document.getElementById('w-plan').textContent     = c.plan === 'growth' ? '$50/mo' : '$300';
+    document.getElementById('proj-plan').textContent  = c.plan === 'growth' ? 'Monthly Growth Plan' : 'Website Launch';
+    document.getElementById('proj-start').textContent = c.startDate || '—';
+    document.getElementById('proj-stage').innerHTML   = `<span class="badge badge--info">${esc(c.stage || '—')}</span>`;
+    document.getElementById('milestones-info').textContent = 'Current stage: ' + (c.stage || '—') + '. Your team will update this as your project progresses.';
+    updateProgress(c.stage);
+  } catch (err) { console.warn('loadClientData:', err.message); }
+}
+
+async function loadMessages(id) {
+  if (isDemoMode) { chatMessages = []; renderMessages(); return; }
+  try {
+    const data = await portalApi({ action: 'getMessages', clientId: id });
+    chatMessages = data.success ? (data.messages || []) : [];
+    const unread = chatMessages.filter(m => m.from !== 'client').length;
+    if (unread > 0) {
+      document.getElementById('msg-badge').textContent = unread;
+      document.getElementById('msg-badge').style.display = 'inline';
+      document.getElementById('w-msgs').textContent = String(unread);
+    }
+  } catch { chatMessages = []; }
+  renderMessages();
+}
+
+async function loadFiles(id) {
+  if (isDemoMode) { uploadedFiles = []; renderFiles(); return; }
+  try {
+    const data = await portalApi({ action: 'getFiles', clientId: id });
+    uploadedFiles = data.success ? (data.files || []) : [];
+  } catch { uploadedFiles = []; }
+  renderFiles();
+}
+
+async function loadInvoices(id) {
+  if (isDemoMode) { renderInvoices([]); return; }
+  try {
+    const data = await portalApi({ action: 'getInvoices', clientId: id });
+    const invoices = data.success ? (data.invoices || []) : [];
+    renderInvoices(invoices);
+
+    // Update outstanding balance and sidebar badge
+    const unpaid = invoices.filter(i => i.status !== 'paid');
+    if (unpaid.length > 0) {
+      const badge = document.getElementById('inv-badge');
+      if (badge) { badge.textContent = unpaid.length; badge.style.display = 'inline'; }
+    }
+
+    // Load outstanding balance from backend for accurate credit-aware totals
+    if (!isDemoMode) loadOutstandingBalance(id);
+  } catch { renderInvoices([]); }
+}
+
+async function loadOutstandingBalance(id) {
+  if (isDemoMode) return;
+  try {
+    const data = await portalApi({ action: 'getOutstandingBalance', clientId: id });
+    if (!data.success) return;
+
+    const outstanding = parseFloat(data.totalOutstanding) || 0;
+    const credit      = parseFloat(data.creditBalance) || 0;
+    const overdue     = parseInt(data.overdueCount) || 0;
+    const unpaidCount = parseInt(data.unpaidCount) || 0;
+
+    // Dashboard widget
+    const wOut = document.getElementById('w-outstanding');
+    const wOutWidget = document.getElementById('w-outstanding-widget');
+    const wOutNote   = document.getElementById('w-outstanding-note');
+    if (outstanding > 0 && wOut && wOutWidget) {
+      wOut.textContent = '$' + outstanding.toFixed(2);
+      wOutWidget.style.display = 'block';
+      if (wOutNote) {
+        wOutNote.textContent = unpaidCount + ' unpaid invoice' + (unpaidCount > 1 ? 's' : '');
+        wOutNote.style.color = overdue > 0 ? 'var(--error)' : 'var(--text-muted)';
+      }
+    }
+
+    // Invoice section outstanding banner
+    const banner = document.getElementById('invoice-outstanding-banner');
+    const bannerText = document.getElementById('invoice-outstanding-text');
+    if (banner && outstanding > 0) {
+      let txt = '$' + outstanding.toFixed(2) + ' outstanding';
+      if (credit > 0) txt += ' · $' + credit.toFixed(2) + ' credit will be applied at checkout';
+      if (bannerText) bannerText.textContent = txt;
+      banner.style.display = 'block';
+    } else if (banner) {
+      banner.style.display = 'none';
+    }
+
+    // Overdue badge
+    const overdueBadge = document.getElementById('invoice-overdue-badge');
+    const overdueText  = document.getElementById('invoice-overdue-text');
+    const filterOverdueBtn = document.getElementById('inv-filter-overdue');
+    if (overdue > 0) {
+      if (overdueBadge) overdueBadge.style.display = 'block';
+      if (overdueText)  overdueText.textContent = overdue + ' overdue';
+      if (filterOverdueBtn) filterOverdueBtn.style.display = 'inline-flex';
+    }
+
+    // Credit notice
+    const creditNotice = document.getElementById('invoice-credit-notice');
+    const creditNoticeText = document.getElementById('invoice-credit-notice-text');
+    if (credit > 0 && creditNotice) {
+      const numCredits = Math.floor(credit / 25);
+      const creditUnits = numCredits === 1 ? '1 credit ($25 voucher)' : numCredits + ' credits ($' + (numCredits * 25) + ' total)';
+      creditNoticeText.textContent = 'You have ' + creditUnits + ' available. Your credit will be automatically applied when you check out — reducing what you owe.';
+      creditNotice.style.display = 'block';
+    } else if (creditNotice) {
+      creditNotice.style.display = 'none';
+    }
+  } catch (err) { console.warn('loadOutstandingBalance:', err.message); }
+}
+
+async function loadReferrals(id) {
+  if (isDemoMode) { renderReferrals([]); return; }
+  try {
+    const data = await portalApi({ action: 'getReferrals', clientId: id });
+    if (data.success) {
+      renderReferrals(data.referrals || []);
+      const earned = (data.referrals || []).filter(r => r.status === 'converted').length * 25;
+      document.getElementById('ref-total').textContent  = (data.referrals || []).length;
+      document.getElementById('ref-earned').textContent = '$' + earned;
+
+      // Show available credit in dashboard widget and referrals notice
+      const credit = parseFloat(data.availableCredit) || 0;
+      const wCredit = document.getElementById('w-credit');
+      const wCreditNote = document.getElementById('w-credit-note');
+      if (wCredit) {
+        wCredit.textContent = '$' + credit.toFixed(0);
+        if (credit > 0 && wCreditNote) {
+          wCreditNote.textContent = 'Applied at next checkout';
+          wCreditNote.style.display = 'block';
+        }
+      }
+
+      if (credit > 0) {
+        const creditEl = document.getElementById('ref-credit-notice');
+        if (creditEl) {
+          const numCredits = Math.floor(credit / 25);
+          const creditsStr = numCredits === 1 ? '1 credit ($25 voucher)' : numCredits + ' credits ($' + (numCredits * 25) + ' total)';
+          creditEl.textContent = 'You have ' + creditsStr + ' available. Your credit will be automatically applied when you check out — no action needed.';
+          creditEl.style.display = 'block';
+        }
+      }
+    }
+  } catch { renderReferrals([]); }
+}
+
+/**
+ * loadContractStatus — KEY FIX
+ * Loads contract status from the backend on every session start.
+ * This ensures the signed state always syncs with what the admin sees,
+ * even when using a different browser or after clearing local storage.
+ */
+async function loadContractStatus(id) {
+  if (isDemoMode) return;
+  try {
+    const data = await portalApi({ action: 'getContract', clientId: id });
+    if (data.success && data.status === 'signed') {
+      showSignedState(data.signerName, data.signedDate, null);
+    }
+  } catch (err) { console.warn('loadContractStatus:', err.message); }
+}
+
+// ── Render helpers ────────────────────────────────────────────
+function renderMessages() {
+  const c = document.getElementById('chat-messages');
+  c.innerHTML = chatMessages.length
+    ? chatMessages.map(m => `
+        <div class="chat-message ${m.from==='client'?'chat-message--self':''}">
+          ${m.from!=='client'?`<div class="portal-sidebar__avatar" style="width:32px;height:32px;font-size:.7rem;flex-shrink:0">${esc((m.name||'A').slice(0,1))}</div>`:''}
+          <div>
+            ${m.from!=='client'?`<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:4px">${esc(m.name||'Support')}</div>`:''}
+            <div class="chat-bubble">${esc(m.text)}</div>
+            <div class="chat-time">${esc(m.time||'')}</div>
+          </div>
+        </div>`).join('')
+    : '<div class="empty-state">No messages yet. Send us a message to get started.</div>';
+  c.scrollTop = c.scrollHeight;
+}
+
+function renderFiles() {
+  const tbody = document.getElementById('files-table');
+  const count = document.getElementById('files-count');
+  if (count) count.textContent = uploadedFiles.length ? '(' + uploadedFiles.length + ')' : '';
+  tbody.innerHTML = uploadedFiles.length
+    ? uploadedFiles.map(f => `
+        <tr>
+          <td style="color:var(--text)">${esc(f.name)}</td>
+          <td><span class="badge badge--gold">${esc(f.ext||'FILE')}</span></td>
+          <td style="color:var(--text-muted);font-size:.8rem">${esc(f.uploadedBy==='admin'?'CWO Team':'You')}</td>
+          <td style="color:var(--text-muted);font-size:.85rem">${esc(f.date||'—')}</td>
+          <td style="color:var(--text-muted);font-size:.85rem">${esc(f.size||'—')}</td>
+          <td>${f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener" class="btn btn--ghost btn--sm">Download</a>`:'<span style="color:var(--text-muted);font-size:.8rem">Processing</span>'}</td>
+        </tr>`).join('')
+    : '<tr><td colspan="6" class="empty-state">No files yet. Upload a file above or check back after your team shares something.</td></tr>';
+}
+
+let allClientInvoices = [];
+
+function renderInvoices(invoices, filter) {
+  allClientInvoices = invoices;
+  const activeFilter = filter || document.querySelector('.inv-filter-btn.active')?.dataset.filter || 'all';
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  const filtered = invoices.filter(inv => {
+    if (activeFilter === 'all')     return true;
+    if (activeFilter === 'paid')    return inv.status === 'paid';
+    if (activeFilter === 'due')     return inv.status !== 'paid';
+    if (activeFilter === 'overdue') {
+      if (inv.status === 'paid') return false;
+      if (!inv.dueDate) return false;
+      const due = new Date(inv.dueDate);
+      return !isNaN(due.getTime()) && due < today;
+    }
+    return true;
+  });
+
+  document.getElementById('invoices-table').innerHTML = filtered.length
+    ? filtered.map(inv => {
+        const credit = parseFloat(inv.creditApplied || 0);
+        const creditCell = credit > 0
+          ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:rgba(31,157,85,.1);border:1px solid rgba(31,157,85,.3);border-radius:100px;font-size:.72rem;font-weight:700;color:var(--success)">-$${credit.toFixed(2)}</span>`
+          : '<span style="color:var(--text-muted);font-size:.8rem">—</span>';
+
+        // Determine overdue
+        let isOverdue = false;
+        if (inv.status !== 'paid' && inv.dueDate) {
+          const due = new Date(inv.dueDate);
+          if (!isNaN(due.getTime()) && due < today) isOverdue = true;
+        }
+
+        let statusBadge;
+        if (inv.status === 'paid') {
+          statusBadge = `<span class="badge badge--success">Paid</span>`;
+        } else if (isOverdue) {
+          statusBadge = `<span class="badge" style="background:rgba(231,76,60,.1);color:var(--error);border:1px solid rgba(231,76,60,.3)">Overdue</span>`;
+        } else {
+          statusBadge = `<span class="badge badge--warning">Due</span>`;
+        }
+
+        const payAction = inv.status === 'due' || (inv.status !== 'paid')
+          ? `<button class="invoice-pay-btn" onclick="initiateStripeCheckout('${esc(inv.number)}', this)">
+               <svg width="12" height="12" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+               Pay Now
+             </button>`
+          : `<span style="color:var(--success);font-size:.8rem">Paid ${esc(inv.paidDate || '')}</span>`;
+
+        return `<tr>
+          <td style="color:var(--text);font-weight:500">${esc(inv.number)}</td>
+          <td>${esc(inv.description)}</td>
+          <td style="color:var(--text)">$${parseFloat(inv.amount || 0).toFixed(2)}</td>
+          <td>${creditCell}</td>
+          <td>${statusBadge}</td>
+          <td style="color:${isOverdue ? 'var(--error)' : 'var(--text-muted)'}">${esc(inv.dueDate || '—')}</td>
+          <td>${payAction}</td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="7" class="empty-state">${activeFilter === 'all' ? 'No invoices yet.' : 'No invoices matching this filter.'}</td></tr>`;
+}
+
+// Wire up invoice filter buttons
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.inv-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.inv-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderInvoices(allClientInvoices, btn.dataset.filter);
+    });
+  });
+});
+// ── Stripe Checkout ───────────────────────────────────────────
+async function initiateStripeCheckout(invoiceNumber, btn) {
+  if (!currentUser) return;
+
+  if (btn) { btn.textContent = 'Opening...'; btn.disabled = true; }
+
+  if (isDemoMode) {
+    toast('Demo mode — Stripe checkout is simulated. In production, you would be redirected to Stripe.', 'info');
+    if (btn) { btn.textContent = 'Pay Now'; btn.disabled = false; }
+    return;
+  }
+
+  try {
+    const data = await portalApi({
+      action: 'createStripeSession',
+      clientId: currentUser.id,
+      invoiceNumber,
+    });
+
+    if (!data.success) {
+      // Fallback to static Stripe link if dynamic session fails
+      const sl = (typeof CONFIG !== 'undefined' ? CONFIG.STRIPE_MONTHLY_LINK : '') || null;
+      if (sl && sl !== '#') {
+        window.open(sl, '_blank', 'noopener');
+      } else {
+        toast(data.message || 'Could not open checkout. Please contact us.', 'error');
+      }
+      if (btn) { btn.textContent = 'Pay Now'; btn.disabled = false; }
+      return;
+    }
+
+    if (data.fullyCovered) {
+      // Invoice fully covered by credit — no payment needed
+      const creditApplied = parseFloat(data.creditApplied || 0);
+      const msg = creditApplied > 0
+        ? `Invoice ${invoiceNumber} fully covered by $${creditApplied.toFixed(2)} account credit — no payment needed!`
+        : `Invoice ${invoiceNumber} was already fully covered by credit — no payment needed.`;
+      toast(msg, 'success');
+      showPaymentSuccessBanner(invoiceNumber, true);
+      // Refresh invoices, credit balance, and outstanding totals
+      await loadInvoices(currentUser.id);
+      await loadOutstandingBalance(currentUser.id);
+      await loadReferrals(currentUser.id); // refresh credit widget
+      if (btn) { btn.textContent = 'Pay Now'; btn.disabled = false; }
+      return;
+    }
+
+    // Show credit applied info if any was deducted at checkout
+    if (data.creditApplied && parseFloat(data.creditApplied) > 0) {
+      toast('$' + parseFloat(data.creditApplied).toFixed(2) + ' credit applied — redirecting to pay $' + parseFloat(data.chargedAmount).toFixed(2), 'success');
+    }
+
+    // Redirect to Stripe checkout
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      toast('Checkout URL not returned. Please try again.', 'error');
+      if (btn) { btn.textContent = 'Pay Now'; btn.disabled = false; }
+    }
+  } catch (err) {
+    toast('Connection error. Please try again.', 'error');
+    if (btn) { btn.textContent = 'Pay Now'; btn.disabled = false; }
+  }
+}
+
+// ── Payment success handler (URL param after Stripe redirect) ─
+async function handlePaymentSuccessParam() {
+  const params = new URLSearchParams(window.location.search);
+  const invoiceNumber = params.get('payment_success');
+  const sessionId     = params.get('stripe_session');
+  if (!invoiceNumber || !currentUser) return;
+
+  // Clean URL immediately
+  const cleanUrl = window.location.pathname;
+  window.history.replaceState({}, '', cleanUrl);
+
+  if (isDemoMode) {
+    showPaymentSuccessBanner(invoiceNumber, false);
+    return;
+  }
+
+  try {
+    const data = await portalApi({
+      action: 'verifyStripePayment',
+      clientId: currentUser.id,
+      invoiceNumber,
+      sessionId: sessionId || '',
+    });
+
+    if (data.success) {
+      showPaymentSuccessBanner(invoiceNumber, false);
+      await loadInvoices(currentUser.id);
+      await loadClientData(currentUser.id);        // refresh credit balance widget
+      await loadOutstandingBalance(currentUser.id); // refresh outstanding totals
+    } else {
+      toast('Payment verification failed: ' + (data.message || 'Please contact us.'), 'error');
+    }
+  } catch (err) {
+    toast('Could not verify payment. Please contact us to confirm.', 'error');
+  }
+}
+
+function showPaymentSuccessBanner(invoiceNumber, fullyByCreditOnly) {
+  const banner = document.getElementById('payment-success-banner');
+  const text   = document.getElementById('payment-success-text');
+  if (!banner || !text) return;
+  text.textContent = fullyByCreditOnly
+    ? 'Invoice ' + invoiceNumber + ' was fully covered by your account credit — no payment needed.'
+    : 'Invoice ' + invoiceNumber + ' has been paid. A confirmation email has been sent to you.';
+  banner.style.display = 'flex';
+  showSection('invoices'); // navigate to invoices section
+  setTimeout(() => { banner.style.display = 'none'; }, 12000);
+}
+
+function renderReferrals(refs) {
+  document.getElementById('referrals-table').innerHTML = refs.length
+    ? refs.map(r => `
+        <tr>
+          <td style="color:var(--text)">${esc(r.business||'—')}</td>
+          <td>${esc(r.date||'—')}</td>
+          <td><span class="badge badge--${r.status==='converted'?'success':'warning'}">${esc(r.status||'—')}</span></td>
+          <td style="color:var(--gold);font-weight:500">${r.status==='converted'?'$25':'Pending'}</td>
+        </tr>`).join('')
+    : '<tr><td colspan="4" class="empty-state">No referrals yet. Share your code to start earning.</td></tr>';
+}
+
+// ── Chat ─────────────────────────────────────────────────────
+document.getElementById('send-msg-btn').addEventListener('click', sendMsg);
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+async function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const text  = input.value.trim();
+  if (!text || !currentUser) return;
+  const msg = { from:'client', name:currentUser.name, text, time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) };
+  chatMessages.push(msg); renderMessages(); input.value = '';
+  if (!isDemoMode) {
+    try { await portalApi({ action:'sendMessage', clientId:currentUser.id, message:msg, role:'client' }); }
+    catch (e) { console.warn('sendMsg:', e.message); }
+  }
+}
+
+// ── File upload ───────────────────────────────────────────────
+const dropZone  = document.getElementById('file-drop-zone');
+const fileInput = document.getElementById('file-input');
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') fileInput.click(); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleUpload(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleUpload(e.target.files));
+
+async function handleUpload(list) {
+  if (!list.length || !currentUser) return;
+  const prog  = document.getElementById('upload-progress');
+  const bar   = document.getElementById('upload-bar');
+  const label = document.getElementById('upload-label');
+  prog.style.display = 'block';
+  for (let i = 0; i < list.length; i++) {
+    const file = list[i];
+    label.textContent = `Uploading ${file.name}... (${i+1}/${list.length})`;
+    bar.style.width = Math.round(((i+0.5)/list.length)*90) + '%';
+    const ext  = file.name.split('.').pop().toUpperCase();
+    const size = file.size > 1048576 ? (file.size/1048576).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
+    if (isDemoMode) {
+      uploadedFiles.push({ name:file.name, ext, date:new Date().toLocaleDateString(), size, url:null, uploadedBy:'client' });
+    } else {
+      await new Promise(res => {
+        const r = new FileReader();
+        r.onload = async () => {
+          const b64 = r.result.split(',')[1];
+          try {
+            const data = await portalApi({ action:'uploadFile', clientId:currentUser.id, fileName:file.name, fileData:b64, mimeType:file.type, size, uploadedBy:'client' });
+            uploadedFiles.push({ name:file.name, ext, date:new Date().toLocaleDateString(), size, url:data.url||null, uploadedBy:'client' });
+          } catch (err) { console.warn('upload:', err.message); toast('Upload failed: '+file.name,'error'); }
+          res();
+        };
+        r.readAsDataURL(file);
+      });
+    }
+  }
+  bar.style.width = '100%'; label.textContent = 'Upload complete.';
+  renderFiles(); fileInput.value = '';
+  setTimeout(() => { prog.style.display='none'; bar.style.width='0%'; }, 2500);
+}
+
+// ── Contract / Signature ──────────────────────────────────────
+function initCanvas() {
+  const canvas = document.getElementById('signature-canvas');
+  if (!canvas) return;
+  sigCtx = canvas.getContext('2d');
+  sigCtx.strokeStyle = '#E2BF72';
+  sigCtx.lineWidth   = 2.5;
+  sigCtx.lineCap     = 'round';
+  sigCtx.lineJoin    = 'round';
+
+  const pos = ev => {
+    const r = canvas.getBoundingClientRect();
+    const s = ev.touches ? ev.touches[0] : ev;
+    return { x:(s.clientX-r.left)*(canvas.width/r.width), y:(s.clientY-r.top)*(canvas.height/r.height) };
+  };
+  canvas.addEventListener('mousedown',  ev => { sigDrawing=true; const p=pos(ev); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); });
+  canvas.addEventListener('mousemove',  ev => { if(!sigDrawing) return; const p=pos(ev); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); });
+  canvas.addEventListener('mouseup',   () => sigDrawing=false);
+  canvas.addEventListener('mouseleave',() => sigDrawing=false);
+  canvas.addEventListener('touchstart', ev => { ev.preventDefault(); sigDrawing=true; const p=pos(ev); sigCtx.beginPath(); sigCtx.moveTo(p.x,p.y); }, {passive:false});
+  canvas.addEventListener('touchmove',  ev => { ev.preventDefault(); if(!sigDrawing) return; const p=pos(ev); sigCtx.lineTo(p.x,p.y); sigCtx.stroke(); }, {passive:false});
+  canvas.addEventListener('touchend',  () => sigDrawing=false);
+
+  document.getElementById('clear-sig-btn').addEventListener('click', () => {
+    sigCtx.clearRect(0,0,canvas.width,canvas.height);
+  });
+}
+
+document.getElementById('sign-contract-btn').addEventListener('click', async () => {
+  const name  = document.getElementById('signer-name').value.trim();
+  const errEl = document.getElementById('contract-error');
+  errEl.style.display = 'none';
+
+  if (!name) { errEl.textContent='Please enter your full legal name.'; errEl.style.display='block'; return; }
+
+  const canvas  = document.getElementById('signature-canvas');
+  const imgData = sigCtx.getImageData(0,0,canvas.width,canvas.height).data;
+  const hasInk  = imgData.some((v,i) => i%4===3 && v>0);
+  if (!hasInk) { errEl.textContent='Please draw your signature in the box.'; errEl.style.display='block'; return; }
+
+  const signatureData = canvas.toDataURL('image/png');
+  const timestamp     = new Date().toLocaleString();
+  const btn           = document.getElementById('sign-contract-btn');
+  btn.textContent = 'Saving...'; btn.disabled = true;
+
+  if (!isDemoMode) {
+    try {
+      const res = await portalApi({
+        action: 'signContract',
+        clientId:      currentUser?.id,
+        signerName:    name,
+        signatureData,          // base64 PNG stored in backend
+        timestamp,
+      });
+      if (!res.success) {
+        errEl.textContent = res.message || 'Failed to save. Please try again.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Sign & Accept Agreement'; btn.disabled = false;
+        return;
+      }
+    } catch {
+      errEl.textContent = 'Connection error. Please try again.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Sign & Accept Agreement'; btn.disabled = false;
+      return;
+    }
+  }
+
+  showSignedState(name, timestamp, signatureData);
+  toast('Agreement signed successfully.', 'success');
+});
+
+function showSignedState(signerName, signedDate, sigImg) {
+  document.getElementById('sign-section').style.display         = 'none';
+  document.getElementById('contract-signed-msg').style.display  = 'block';
+  document.getElementById('signed-by').textContent              = signerName || '—';
+  document.getElementById('signed-date').textContent            = signedDate || '—';
+  document.getElementById('contract-status-badge').textContent  = 'Signed';
+  document.getElementById('contract-status-badge').className    = 'badge badge--success';
+
+  // Show signature image preview if we have it
+  if (sigImg) {
+    const wrap = document.getElementById('sig-preview-wrap');
+    const img  = document.getElementById('sig-preview-img');
+    if (wrap && img) { img.src = sigImg; wrap.style.display = 'block'; }
+  }
+}
+
+// ── Review form ───────────────────────────────────────────────
+document.getElementById('review-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const rating = parseInt(document.getElementById('review-rating').value)||0;
+  const title  = document.getElementById('review-title').value.trim();
+  const body   = document.getElementById('review-body').value.trim();
+  if (!rating)    { toast('Please select a rating.','error'); return; }
+  if (!title)     { toast('Please add a title.','error'); return; }
+  if (body.length < 20) { toast('Please write a more detailed review.','error'); return; }
+
+  const btn = document.getElementById('review-submit-btn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  if (!isDemoMode) {
+    try {
+      const res = await portalApi({ action:'submitReview', clientId:currentUser?.id,
+        clientName:currentUser?.name, rating, title, body, date:new Date().toLocaleDateString() });
+      if (!res.success) { toast(res.message||'Submission failed.','error'); btn.textContent='Submit Review'; btn.disabled=false; return; }
+    } catch { toast('Connection error.','error'); btn.textContent='Submit Review'; btn.disabled=false; return; }
+  }
+
+  document.getElementById('review-success').style.display = 'block';
+  document.getElementById('review-title').value = '';
+  document.getElementById('review-body').value  = '';
+  document.getElementById('review-rating').value= '0';
+  document.querySelectorAll('#star-rating-container svg').forEach(s => s.style.fill='none');
+  btn.textContent = 'Submit Review'; btn.disabled = false;
+});
+
+// ── Referral copy ─────────────────────────────────────────────
+function copyCode(el) {
+  const code = (el || document.getElementById('referral-code-display')).textContent.trim();
+  if (code === '—') return;
+  navigator.clipboard.writeText(code).then(() => {
+    document.getElementById('copy-feedback').textContent = 'Copied to clipboard.';
+    setTimeout(() => document.getElementById('copy-feedback').textContent='', 3000);
+  }).catch(() => toast('Code: ' + code, 'info'));
+}
+
+document.getElementById('copy-code-btn').addEventListener('click', () => copyCode(null));
+document.getElementById('share-email-btn').addEventListener('click', () => {
+  const code = document.getElementById('referral-code-display').textContent.trim();
+  const name = currentUser?.name || 'A colleague';
+  const s = encodeURIComponent(name + ' recommends CWO Strategy Group for your business');
+  const b = encodeURIComponent(`Hi,\n\nI've been working with CWO Strategy Group on my business website and wanted to share their services with you.\n\nThey offer professional web design starting at $300 and a complete monthly SEO + hosting plan for $50/month.\n\nUse my referral code when booking: ${code}\n\n${typeof CONFIG !== 'undefined' ? CONFIG.APPS_SCRIPT_URL ? 'https://www.cwostrategygroup.com' : '' : ''}\n\nBest,\n${name}`);
+  window.location.href = 'mailto:?subject=' + s + '&body=' + b;
+});
+
+// ── Password change ───────────────────────────────────────────
+const pwNew = document.getElementById('pw-new');
+pwNew.addEventListener('input', () => {
+  const val = pwNew.value;
+  const strength = val.length < 6 ? 1 : val.length < 8 ? 2 : /[A-Z]/.test(val) && /[0-9]/.test(val) ? 4 : 3;
+  const colors = ['', '#EF4444', '#F97316', '#EAB308', '#22C55E'];
+  const labels = ['', 'Too short', 'Weak', 'Moderate', 'Strong'];
+  document.getElementById('pw-strength-bar').style.background = colors[strength];
+  document.getElementById('pw-strength-bar').style.width = (strength * 25) + '%';
+  document.getElementById('pw-strength-label').textContent = val.length ? labels[strength] : '';
+  document.getElementById('pw-strength-label').style.color = colors[strength];
+});
+
+document.getElementById('pw-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const current = document.getElementById('pw-current').value;
+  const nw      = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+  const errEl   = document.getElementById('pw-error');
+  const succEl  = document.getElementById('pw-success');
+  errEl.style.display = 'none'; succEl.style.display = 'none';
+
+  if (nw.length < 8) { errEl.textContent='Password must be at least 8 characters.'; errEl.style.display='block'; return; }
+  if (nw !== confirm) { errEl.textContent='New passwords do not match.'; errEl.style.display='block'; return; }
+
+  const btn = document.getElementById('pw-submit-btn');
+  btn.textContent = 'Updating...'; btn.disabled = true;
+
+  if (isDemoMode) {
+    succEl.style.display = 'block'; e.target.reset();
+    btn.textContent = 'Update Password'; btn.disabled = false; return;
+  }
+
+  try {
+    const res = await portalApi({ action:'changePassword', clientId:currentUser?.id, currentPassword:current, newPassword:nw });
+    if (res.success) { succEl.style.display='block'; e.target.reset(); }
+    else { errEl.textContent=res.message||'Update failed.'; errEl.style.display='block'; }
+  } catch { errEl.textContent='Connection error. Please try again.'; errEl.style.display='block'; }
+
+  btn.textContent = 'Update Password'; btn.disabled = false;
+});
+</script>
+</body>
+</html>

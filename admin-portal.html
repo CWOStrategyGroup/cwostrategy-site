@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal | CWO Strategy Group</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0}
+    .status-dot.active{background:var(--success)}
+    .status-dot.pending{background:var(--warning)}
+    .status-dot.inactive{background:var(--text-muted)}
+    .client-row{cursor:pointer}
+    .client-row:hover td{background:rgba(255,255,255,.025)}
+    .bar-wrap{background:var(--bg-surface);border-radius:100px;height:8px;overflow:hidden;margin-top:6px}
+    .bar-fill{height:100%;border-radius:100px;background:var(--gold);transition:width 1s ease}
+    .empty-state{text-align:center;padding:40px 24px;color:var(--text-muted);font-size:.875rem}
+    .review-card{padding:20px;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px}
+    .demo-bar{position:fixed;top:var(--nav-h);left:0;right:0;z-index:998;background:rgba(231,76,60,.1);
+      border-bottom:1px solid rgba(231,76,60,.3);color:var(--error);font-size:.78rem;text-align:center;
+      padding:7px 16px;font-family:Outfit,sans-serif;letter-spacing:.04em}
+    /* Rich text editor toolbar */
+    .rte-toolbar{display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px;
+      background:var(--bg-surface);border:1px solid var(--border);
+      border-radius:var(--radius) var(--radius) 0 0;border-bottom:none}
+    .rte-btn{padding:6px 10px;border-radius:var(--radius-sm);font-size:.8rem;font-weight:600;
+      color:var(--text-secondary);background:transparent;border:1px solid transparent;
+      cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:4px;
+      font-family:Outfit,sans-serif;min-width:32px;justify-content:center}
+    .rte-btn:hover{background:var(--bg-card);color:var(--text);border-color:var(--border)}
+    .rte-btn.active{background:var(--gold-dim);color:var(--gold);border-color:rgba(201,168,76,.3)}
+    .rte-separator{width:1px;background:var(--border);align-self:stretch;margin:0 4px}
+    .rte-area{min-height:200px;background:var(--bg-surface);border:1px solid var(--border);
+      border-radius:0 0 var(--radius) var(--radius);padding:14px 16px;color:var(--text);
+      font-size:.95rem;line-height:1.7;outline:none;resize:vertical;overflow-y:auto}
+    .rte-area:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+    .rte-area p{margin:0 0 12px}
+    .rte-area h2{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text);margin:0 0 10px}
+    .rte-area h3{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:600;color:var(--text);margin:0 0 8px}
+    .rte-area ul,.rte-area ol{margin:0 0 12px;padding-left:20px}
+    .rte-area li{margin-bottom:4px}
+    .rte-area strong{color:var(--text);font-weight:700}
+    .rte-area a{color:var(--gold);text-decoration:underline}
+    .rte-area blockquote{border-left:3px solid var(--gold);margin:0 0 12px;padding:8px 16px;
+      background:var(--bg-card);border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+      color:var(--text-secondary);font-style:italic}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+      z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px}
+    .modal-box{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-xl);
+      padding:36px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto}
+    .toggle-switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+    .toggle-switch input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:100px;
+      cursor:pointer;transition:all .3s}
+    .toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;
+      background:#fff;border-radius:50%;transition:all .3s}
+    .toggle-switch input:checked + .toggle-slider{background:var(--gold)}
+    .toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px)}
+    .page-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;
+      border-bottom:1px solid var(--border)}
+    .page-toggle-row:last-child{border-bottom:none}
+    .credit-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;
+      background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.3);border-radius:100px;
+      font-size:.72rem;font-weight:700;color:var(--success);letter-spacing:.06em}
+    .sig-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);
+      z-index:3000;display:flex;align-items:center;justify-content:center;padding:24px}
+  </style>
+</head>
+<body>
+
+<nav class="nav scrolled" role="navigation" aria-label="Admin navigation">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__logo">
+      <span class="nav__logo-name">CWO Strategy Group</span>
+      <span class="nav__logo-tag" style="color:var(--error)">Admin Portal</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:16px;margin-left:auto">
+      <span id="admin-role-badge" style="display:none;font-size:.72rem;font-weight:600;
+        letter-spacing:.1em;text-transform:uppercase;color:var(--error);padding:4px 10px;
+        background:rgba(231,76,60,.1);border-radius:100px;border:1px solid rgba(231,76,60,.2)">Admin</span>
+      <button class="btn btn--ghost btn--sm" id="admin-logout-btn">Sign Out</button>
+    </div>
+    <button class="nav__hamburger" id="admin-sidebar-toggle" aria-label="Toggle sidebar">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ════════════ LOGIN ════════════ -->
+<div id="admin-login-screen" class="portal-login">
+  <div class="portal-login__card">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--error)">CWO Strategy Group</div>
+      <div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Admin Portal — Restricted</div>
+    </div>
+    <h1 class="portal-login__title">Admin Sign In</h1>
+    <p class="portal-login__subtitle">Authorized CWO Strategy Group team members only.</p>
+    <div id="admin-demo-notice" style="display:none;margin-bottom:20px;padding:12px 16px;
+      background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);border-radius:var(--radius);font-size:.8rem;color:var(--error)">
+      <strong>Demo Mode</strong> — Backend not configured. Use <strong>admin@cwo.com / admin123</strong>.
+    </div>
+    <form id="admin-login-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="admin-email">Admin Email</label>
+        <input type="email" id="admin-email" class="form-input" placeholder="admin@cwostrategygroup.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="admin-password">Password</label>
+        <input type="password" id="admin-password" class="form-input" placeholder="Admin password" required autocomplete="current-password">
+      </div>
+      <div id="admin-login-error" style="display:none;color:var(--error);font-size:.85rem;
+        margin-bottom:16px;padding:10px 14px;background:rgba(231,76,60,.08);
+        border:1px solid rgba(231,76,60,.2);border-radius:var(--radius-sm)"></div>
+      <button type="submit" class="btn btn--danger w-full" style="justify-content:center" id="admin-login-btn">Sign In to Admin Portal</button>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════ APP ════════════ -->
+<div id="admin-app" class="portal-layout hidden">
+  <div id="admin-demo-bar" class="demo-bar" style="display:none">
+    DEMO MODE — Set APPS_SCRIPT_URL in script.js and deploy your Apps Script to enable live data.
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="portal-sidebar" id="admin-sidebar">
+    <div class="portal-sidebar__header">
+      <div class="portal-sidebar__user">
+        <div class="portal-sidebar__avatar" style="background:rgba(231,76,60,.12);border-color:rgba(231,76,60,.3);color:var(--error)">AD</div>
+        <div><div class="portal-sidebar__username">Admin Panel</div><div class="portal-sidebar__role">CWO Strategy Group</div></div>
+      </div>
+    </div>
+    <nav class="portal-nav">
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Overview</div>
+        <button class="portal-nav__item active" data-asection="analytics">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Clients</div>
+        <button class="portal-nav__item" data-asection="clients">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients
+        </button>
+        <button class="portal-nav__item" data-asection="create-client">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Create Client
+        </button>
+        <button class="portal-nav__item" data-asection="project-status">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Project Status
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Communication</div>
+        <button class="portal-nav__item" data-asection="messages">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Messages
+        </button>
+        <button class="portal-nav__item" data-asection="files">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Files
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Billing</div>
+        <button class="portal-nav__item" data-asection="invoices">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Invoices
+        </button>
+        <button class="portal-nav__item" data-asection="contracts">
+          <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Contracts
+        </button>
+      </div>
+      <div class="portal-nav__section">
+        <div class="portal-nav__heading">Content</div>
+        <button class="portal-nav__item" data-asection="reviews">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Reviews
+          <span class="portal-nav__badge" id="review-badge" style="display:none">0</span>
+        </button>
+        <button class="portal-nav__item" data-asection="consultations">
+          <svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/><path d="M15 5l4 4"/></svg>Consultations
+          <span class="portal-nav__badge" id="consult-badge" style="display:none">0</span>
+        </button>
+        <button class="portal-nav__item" data-asection="referrals">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Referrals
+        </button>
+        <button class="portal-nav__item" data-asection="mailing">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Mailing List
+        </button>
+        <button class="portal-nav__item" data-asection="email">
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Email Composer
+        </button>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="portal-main" role="main">
+
+    <!-- ── Analytics ─────────────────────────── -->
+    <div class="portal-section active" id="section-analytics">
+      <div class="portal-header">
+        <h1 class="portal-title">Analytics</h1>
+        <button class="btn btn--ghost btn--sm" id="refresh-analytics-btn">Refresh</button>
+      </div>
+      <div class="dashboard-grid">
+        <div class="widget"><div class="widget__label">Active Clients</div><div class="widget__value" id="a-clients">—</div></div>
+        <div class="widget"><div class="widget__label">Monthly Recurring</div><div class="widget__value" id="a-revenue">—</div></div>
+        <div class="widget"><div class="widget__label">Active Projects</div><div class="widget__value" id="a-projects">—</div></div>
+        <div class="widget"><div class="widget__label">Pending Reviews</div><div class="widget__value" id="a-reviews">—</div><div class="widget__change" style="color:var(--warning)">Awaiting approval</div></div>
+        <div class="widget"><div class="widget__label">Outstanding Invoices</div><div class="widget__value" id="a-outstanding">—</div><div class="widget__change" id="a-outstanding-note" style="color:var(--warning)">Total unpaid</div></div>
+        <div class="widget"><div class="widget__label">Paid This Month</div><div class="widget__value" id="a-paid-month">—</div><div class="widget__change up">Revenue collected</div></div>
+      </div>
+      <div class="grid-2" style="gap:24px">
+        <div class="portal-card">
+          <div class="portal-card__title">Revenue Split</div>
+          <div style="margin-top:8px">
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--text-secondary)"><span>Monthly Plan ($50/mo)</span><span style="color:var(--gold)" id="a-monthly-pct">—</span></div>
+            <div class="bar-wrap"><div class="bar-fill" id="a-monthly-bar" style="width:0%"></div></div>
+          </div>
+          <div style="margin-top:16px">
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--text-secondary)"><span>One-Time Launch ($300)</span><span style="color:var(--info)" id="a-onetime-pct">—</span></div>
+            <div class="bar-wrap"><div class="bar-fill" id="a-onetime-bar" style="width:0%;background:var(--info)"></div></div>
+          </div>
+          <div class="grid-2" style="gap:16px;margin-top:24px">
+            <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Total Paid Revenue</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--text)" id="a-total-rev">—</div></div>
+            <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Consultations</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:700;color:var(--text)" id="a-consults">—</div></div>
+          </div>
+        </div>
+        <div class="portal-card">
+          <div class="portal-card__title">Recent Activity</div>
+          <div id="activity-list"><div class="empty-state">No activity yet.</div></div>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Other Metrics</div>
+        <div style="display:flex;gap:32px;flex-wrap:wrap">
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Subscribers</div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--text)" id="a-subs">—</div></div>
+          <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Referrals</div><div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--text)" id="a-refs">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Clients ────────────────────────────── -->
+    <div class="portal-section" id="section-clients">
+      <div class="portal-header">
+        <h1 class="portal-title">Clients</h1>
+        <button class="btn btn--primary btn--sm" onclick="showAdminSection('create-client')">+ New Client</button>
+      </div>
+      <div class="portal-card" style="margin-bottom:16px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="client-search" class="form-input" placeholder="Search by name, email, or business..." style="max-width:300px">
+          <select class="form-select" id="client-filter" style="max-width:160px">
+            <option value="all">All Status</option><option value="active">Active</option>
+            <option value="pending">Pending</option><option value="inactive">Inactive</option>
+          </select>
+          <button class="btn btn--ghost btn--sm" id="refresh-clients-btn">Refresh</button>
+          <button class="btn btn--ghost btn--sm" id="export-clients-btn">Export CSV</button>
+          <span id="client-count-label" style="font-size:.8rem;color:var(--text-muted);margin-left:auto"></span>
+        </div>
+      </div>
+      <div class="portal-card" style="padding:0;overflow:auto">
+        <table class="data-table" aria-label="Client list">
+          <thead><tr><th>Client</th><th>Plan</th><th>Status</th><th>Stage</th><th>Credit</th><th>Since</th><th>Actions</th></tr></thead>
+          <tbody id="clients-tbody"><tr><td colspan="7" class="empty-state">Loading clients...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Create Client ──────────────────────── -->
+    <div class="portal-section" id="section-create-client">
+      <div class="portal-header"><h1 class="portal-title">Create Client Account</h1></div>
+      <div class="portal-card" style="max-width:640px">
+        <form id="create-client-form" novalidate>
+          <div class="grid-2" style="gap:16px">
+            <div class="form-group"><label class="form-label" for="cc-name">Full Name <span style="color:var(--error)">*</span></label><input type="text" id="cc-name" class="form-input" required autocomplete="off"></div>
+            <div class="form-group"><label class="form-label" for="cc-email">Email <span style="color:var(--error)">*</span></label><input type="email" id="cc-email" class="form-input" required autocomplete="off"></div>
+          </div>
+          <div class="grid-2" style="gap:16px">
+            <div class="form-group"><label class="form-label" for="cc-business">Business Name <span style="color:var(--error)">*</span></label><input type="text" id="cc-business" class="form-input" required></div>
+            <div class="form-group"><label class="form-label" for="cc-phone">Phone</label><input type="tel" id="cc-phone" class="form-input" autocomplete="off"></div>
+          </div>
+          <div class="grid-2" style="gap:16px">
+            <div class="form-group">
+              <label class="form-label" for="cc-plan">Service Plan <span style="color:var(--error)">*</span></label>
+              <select id="cc-plan" class="form-select" required>
+                <option value="" disabled selected>Select plan...</option>
+                <option value="one-time">Website Launch — $300</option>
+                <option value="growth">Monthly Growth Plan — $50/mo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cc-status">Status</label>
+              <select id="cc-status" class="form-select">
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label" for="cc-password">Temporary Password <span style="color:var(--error)">*</span></label><input type="text" id="cc-password" class="form-input" placeholder="Emailed to client on creation" required autocomplete="new-password"></div>
+          <div class="form-group"><label class="form-label" for="cc-notes">Internal Notes</label><textarea id="cc-notes" class="form-textarea" rows="3" placeholder="Visible to admins only..."></textarea></div>
+          <div id="create-client-error" style="display:none;color:var(--error);font-size:.85rem;margin-bottom:12px;padding:10px;background:rgba(231,76,60,.08);border-radius:var(--radius-sm)"></div>
+          <button type="submit" class="btn btn--primary" id="create-client-btn">Create Client Account</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Project Status ─────────────────────── -->
+    <div class="portal-section" id="section-project-status">
+      <div class="portal-header"><h1 class="portal-title">Project Status</h1></div>
+      <div class="portal-card" style="max-width:620px;margin-bottom:24px">
+        <div class="portal-card__title">Update Client Stage</div>
+        <div class="grid-2" style="gap:16px">
+          <div class="form-group"><label class="form-label" for="ps-client">Client</label><select id="ps-client" class="form-select"><option value="" disabled selected>Select client...</option></select></div>
+          <div class="form-group">
+            <label class="form-label" for="ps-stage">New Stage</label>
+            <select id="ps-stage" class="form-select">
+              <option value="consultation">1 — Consultation</option>
+              <option value="onboarding">2 — Onboarding</option>
+              <option value="design">3 — Design</option>
+              <option value="review">4 — Review</option>
+              <option value="launch">5 — Launch</option>
+              <option value="ongoing">6 — Ongoing SEO</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label" for="ps-note">Note for Client (sent in email)</label><textarea id="ps-note" class="form-textarea" rows="3" placeholder="Optional message sent alongside the status update..."></textarea></div>
+        <button class="btn btn--primary" id="update-status-btn">Update Status</button>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">All Active Projects</div>
+        <table class="data-table" aria-label="Active projects">
+          <thead><tr><th>Client</th><th>Business</th><th>Stage</th><th>Last Updated</th><th>Action</th></tr></thead>
+          <tbody id="projects-tbody"><tr><td colspan="5" class="empty-state">No active projects.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Messages ───────────────────────────── -->
+    <div class="portal-section" id="section-messages">
+      <div class="portal-header"><h1 class="portal-title">Client Messages</h1></div>
+      <div class="grid-2" style="gap:24px;align-items:flex-start">
+        <div class="portal-card">
+          <div class="portal-card__title">Conversations</div>
+          <div id="conversation-list"><div class="empty-state">Load clients first.</div></div>
+        </div>
+        <div class="portal-card" style="padding:0">
+          <div style="padding:18px 24px 0;font-size:1rem;font-weight:600;color:var(--text);border-bottom:1px solid var(--border)" id="chat-header">Select a client</div>
+          <div class="chat-container" style="height:420px">
+            <div class="chat-messages" id="admin-chat-messages"><div class="empty-state">Select a conversation.</div></div>
+            <div class="chat-input-area">
+              <textarea class="chat-input" id="admin-chat-input" placeholder="Reply to client..." rows="1" disabled aria-label="Admin message"></textarea>
+              <button class="btn btn--primary btn--sm" id="admin-send-btn" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Files ──────────────────────────────── -->
+    <div class="portal-section" id="section-files">
+      <div class="portal-header"><h1 class="portal-title">File Management</h1></div>
+      <div class="portal-card" style="margin-bottom:24px">
+        <div class="portal-card__title">Upload File for Client</div>
+        <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+          <div class="form-group" style="margin-bottom:0;min-width:220px">
+            <label class="form-label" for="admin-file-client">Client</label>
+            <select id="admin-file-client" class="form-select"><option value="" disabled selected>Select client...</option></select>
+          </div>
+          <button class="btn btn--outline btn--sm" id="admin-upload-btn">Choose Files</button>
+          <input type="file" id="admin-file-input" style="display:none" multiple>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">All Client Files</div>
+        <table class="data-table" aria-label="All client files">
+          <thead><tr><th>Client</th><th>File</th><th>Type</th><th>Uploaded By</th><th>Date</th><th>Size</th><th>Action</th></tr></thead>
+          <tbody id="admin-files-tbody"><tr><td colspan="7" class="empty-state">No files yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Invoices ────────────────────────────── -->
+    <div class="portal-section" id="section-invoices">
+      <div class="portal-header"><h1 class="portal-title">Invoices</h1></div>
+      <div class="portal-card" style="max-width:640px;margin-bottom:24px">
+        <div class="portal-card__title">Generate Invoice</div>
+        <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:20px">Referral credits are automatically applied to new invoices. If a client has credit added after invoice creation, it is automatically applied when they click "Pay Now" at Stripe checkout.</p>
+        <form id="invoice-form" novalidate>
+          <div class="grid-2" style="gap:16px">
+            <div class="form-group"><label class="form-label" for="inv-client">Client <span style="color:var(--error)">*</span></label><select id="inv-client" class="form-select" required><option value="" disabled selected>Select...</option></select></div>
+            <div class="form-group"><label class="form-label" for="inv-amount">Amount ($) <span style="color:var(--error)">*</span></label><input type="number" id="inv-amount" class="form-input" placeholder="50.00" step="0.01" min="0" required></div>
+          </div>
+          <div id="client-credit-preview" style="display:none;padding:10px 14px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius);font-size:.875rem;color:var(--success);margin-bottom:12px"></div>
+          <div class="form-group"><label class="form-label" for="inv-desc">Description <span style="color:var(--error)">*</span></label><input type="text" id="inv-desc" class="form-input" placeholder="Monthly Growth Plan — March 2025" required></div>
+          <div class="grid-2" style="gap:16px">
+            <div class="form-group"><label class="form-label" for="inv-due">Due Date <span style="color:var(--error)">*</span></label><input type="date" id="inv-due" class="form-input" required></div>
+            <div class="form-group"><label class="form-label" for="inv-stripe">Stripe Payment Link (optional)</label><input type="url" id="inv-stripe" class="form-input" placeholder="https://buy.stripe.com/..."></div>
+          </div>
+          <button type="submit" class="btn btn--primary" id="gen-invoice-btn">Generate &amp; Email Invoice</button>
+        </form>
+      </div>
+      <div class="portal-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div class="portal-card__title" style="margin-bottom:0">All Invoices</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="inv-search" class="form-input" placeholder="Search client or invoice..." style="max-width:220px;font-size:.85rem">
+            <select id="inv-status-filter" class="form-select" style="max-width:140px;font-size:.85rem">
+              <option value="all">All Status</option>
+              <option value="due">Unpaid</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <button class="btn btn--ghost btn--sm" id="export-invoices-btn">Export CSV</button>
+            <button class="btn btn--ghost btn--sm" id="refresh-invoices-btn">Refresh</button>
+          </div>
+        </div>
+        <table class="data-table" aria-label="All invoices">
+          <thead><tr><th>Invoice #</th><th>Client</th><th>Description</th><th>Amount</th><th>Credit</th><th>Status</th><th>Due / Paid</th><th>Action</th></tr></thead>
+          <tbody id="admin-invoices-tbody"><tr><td colspan="8" class="empty-state">No invoices yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Contracts ──────────────────────────── -->
+    <div class="portal-section" id="section-contracts">
+      <div class="portal-header"><h1 class="portal-title">Contracts</h1></div>
+      <div class="portal-card">
+        <div class="portal-card__title">Contract Status by Client</div>
+        <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:16px">Signatures are stored digitally and saved to Google Drive. Admins can update signer details or void a contract to request a fresh signature.</p>
+        <table class="data-table" aria-label="Contracts">
+          <thead><tr><th>Client</th><th>Business</th><th>Signer</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody id="contracts-tbody"><tr><td colspan="6" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Reviews ────────────────────────────── -->
+    <div class="portal-section" id="section-reviews">
+      <div class="portal-header"><h1 class="portal-title">Review Moderation</h1></div>
+      <div class="portal-card" style="margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="portal-card__title" style="margin-bottom:0">Pending Approval</div>
+          <span class="badge badge--warning" id="pending-count">0 pending</span>
+        </div>
+        <div id="pending-reviews-list"><div class="empty-state">No pending reviews.</div></div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Published Reviews</div>
+        <div id="approved-reviews-list"><div class="empty-state">No published reviews yet.</div></div>
+      </div>
+    </div>
+
+    <!-- ── Referrals ───────────────────────────── -->
+    <div class="portal-section" id="section-referrals">
+      <div class="portal-header"><h1 class="portal-title">Referral Tracking</h1></div>
+      <div class="dashboard-grid" style="margin-bottom:24px">
+        <div class="widget"><div class="widget__label">Total Referrals</div><div class="widget__value" id="ref-count">—</div></div>
+        <div class="widget"><div class="widget__label">Converted</div><div class="widget__value" id="ref-converted">—</div></div>
+        <div class="widget"><div class="widget__label">Credits Issued</div><div class="widget__value" id="ref-rewards">—</div></div>
+        <div class="widget"><div class="widget__label">Conversion Rate</div><div class="widget__value" id="ref-rate">—</div></div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">All Referrals</div>
+        <table class="data-table" aria-label="All referrals">
+          <thead><tr><th>Referred By</th><th>Business</th><th>Date</th><th>Status</th><th>Credit</th><th>Action</th></tr></thead>
+          <tbody id="referrals-tbody"><tr><td colspan="6" class="empty-state">No referrals yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Mailing List ────────────────────────── -->
+    <div class="portal-section" id="section-mailing">
+      <div class="portal-header"><h1 class="portal-title">Mailing List</h1></div>
+      <div class="dashboard-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:24px">
+        <div class="widget"><div class="widget__label">Total Subscribers</div><div class="widget__value" id="mail-total">—</div></div>
+        <div class="widget"><div class="widget__label">This Month</div><div class="widget__value" id="mail-month">—</div></div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-card__title">Subscribers</div>
+        <table class="data-table" aria-label="Mailing list">
+          <thead><tr><th>Email</th><th>Subscribed</th><th>Source</th><th>Action</th></tr></thead>
+          <tbody id="mailing-tbody"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Consultations ──────────────────────────── -->
+    <div class="portal-section" id="section-consultations">
+      <div class="portal-header">
+        <h1 class="portal-title">Consultations</h1>
+        <button class="btn btn--ghost btn--sm" id="export-consultations-btn">Export CSV</button>
+      </div>
+      <div class="dashboard-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+        <div class="widget"><div class="widget__label">Total Requests</div><div class="widget__value" id="con-total">—</div></div>
+        <div class="widget"><div class="widget__label">This Month</div><div class="widget__value" id="con-month">—</div></div>
+        <div class="widget"><div class="widget__label">With Referral Code</div><div class="widget__value" id="con-refs">—</div></div>
+      </div>
+      <div class="portal-card" style="padding:0;overflow:auto">
+        <table class="data-table" aria-label="Consultations">
+          <thead><tr><th>Name</th><th>Business</th><th>Email</th><th>Service</th><th>Budget</th><th>Submitted</th><th>Action</th></tr></thead>
+          <tbody id="consultations-tbody"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+        </table>
+      </div>
+      <!-- Consultation detail drawer -->
+      <div id="consult-detail" style="display:none;margin-top:24px">
+        <div class="portal-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <div class="portal-card__title" style="margin-bottom:0" id="consult-detail-title">Consultation Details</div>
+            <button class="btn btn--ghost btn--sm" onclick="document.getElementById('consult-detail').style.display='none'">Close</button>
+          </div>
+          <div id="consult-detail-body"></div>
+          <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn--primary btn--sm" id="consult-create-client-btn">Create Client Account</button>
+            <button class="btn btn--outline btn--sm" id="consult-email-btn">Send Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Email Composer ─────────────────────── -->
+    <div class="portal-section" id="section-email">
+      <div class="portal-header"><h1 class="portal-title">Email Composer</h1></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:flex-start">
+
+        <!-- Left: Compose form -->
+        <div class="portal-card">
+          <div class="portal-card__title">Compose Email</div>
+          <form id="compose-form" novalidate>
+
+            <div class="form-group">
+              <label class="form-label" for="email-to">To <span style="color:var(--error)">*</span></label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input type="text" id="email-to" class="form-input" placeholder="email@address.com" required style="flex:1;min-width:160px">
+                <select id="email-to-select" class="form-select" style="max-width:200px" aria-label="Quick-fill recipient">
+                  <option value="">Add client...</option>
+                </select>
+              </div>
+              <span class="form-hint">Separate multiple with commas</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="email-subject">Subject <span style="color:var(--error)">*</span></label>
+              <input type="text" id="email-subject" class="form-input" placeholder="Your message subject" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="email-template">Load Template</label>
+              <select id="email-template" class="form-select">
+                <option value="">— Start from scratch —</option>
+                <option value="welcome">Welcome / Onboarding</option>
+                <option value="update">Project Status Update</option>
+                <option value="invoice_reminder">Invoice Reminder</option>
+                <option value="follow_up">Follow-Up / Check-In</option>
+                <option value="seo_report">Monthly SEO Report</option>
+              </select>
+            </div>
+
+            <!-- Rich text editor -->
+            <div class="form-group">
+              <label class="form-label">Message Body <span style="color:var(--error)">*</span></label>
+              <div class="rte-toolbar" role="toolbar" aria-label="Text formatting">
+                <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><strong>B</strong></button>
+                <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><em>I</em></button>
+                <button type="button" class="rte-btn" data-cmd="underline" title="Underline"><span style="text-decoration:underline">U</span></button>
+                <div class="rte-separator"></div>
+                <button type="button" class="rte-btn" data-cmd="h2" title="Heading">H2</button>
+                <button type="button" class="rte-btn" data-cmd="h3" title="Subheading">H3</button>
+                <button type="button" class="rte-btn" data-cmd="p" title="Paragraph">P</button>
+                <div class="rte-separator"></div>
+                <button type="button" class="rte-btn" data-cmd="ul" title="Bullet list">&#8226; List</button>
+                <button type="button" class="rte-btn" data-cmd="ol" title="Numbered list">1. List</button>
+                <div class="rte-separator"></div>
+                <button type="button" class="rte-btn" data-cmd="blockquote" title="Quote block">❝</button>
+                <button type="button" class="rte-btn" data-cmd="hr" title="Divider">—</button>
+                <button type="button" class="rte-btn" data-cmd="link" title="Insert link">🔗</button>
+                <div class="rte-separator"></div>
+                <button type="button" class="rte-btn" data-cmd="clear" title="Clear formatting" style="color:var(--error)">✕ Clear</button>
+              </div>
+              <div id="email-rte" class="rte-area" contenteditable="true"
+                role="textbox" aria-multiline="true" aria-label="Email body"
+                data-placeholder="Start writing your email here..."></div>
+              <span class="form-hint">Use the toolbar above — no HTML knowledge needed.</span>
+            </div>
+
+            <div class="grid-2" style="gap:12px">
+              <div class="form-group">
+                <label class="form-label" for="email-cta">Button Label (optional)</label>
+                <input type="text" id="email-cta" class="form-input" placeholder="e.g. View Your Portal">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email-cta-url">Button URL (optional)</label>
+                <input type="url" id="email-cta-url" class="form-input" placeholder="https://...">
+              </div>
+            </div>
+
+            <div id="compose-error"   style="display:none;color:var(--error);font-size:.85rem;margin-bottom:12px;padding:10px;background:rgba(231,76,60,.08);border-radius:var(--radius-sm)"></div>
+            <div id="compose-success" style="display:none;padding:14px 18px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius);color:var(--success);font-size:.875rem;margin-bottom:16px"></div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button type="button" class="btn btn--outline" id="render-email-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                Render Preview
+              </button>
+              <button type="submit" class="btn btn--primary" id="send-email-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Send Email
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Live preview -->
+        <div>
+          <div class="portal-card" style="padding:0;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:600;color:var(--text);font-size:.95rem">Email Preview</span>
+              <span id="preview-status" style="font-size:.75rem;color:var(--text-muted)">Click "Render Preview" to update</span>
+            </div>
+            <div style="background:#F2F4F8;min-height:500px">
+              <iframe id="email-preview-frame"
+                style="width:100%;min-height:520px;border:none;display:block"
+                title="Email preview" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;min-height:520px;margin:0;background:#F2F4F8;font-family:Arial,sans-serif;color:#8A9BBF;font-size:14px'>Click &ldquo;Render Preview&rdquo; to see your email</body></html>">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /admin-app -->
+
+<!-- ── Shared Modals ──────────────────────────────────── -->
+
+<!-- Client Edit / Settings Modal -->
+<div id="client-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 id="modal-title" style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--text)">Client Details</h3>
+      <button class="btn btn--ghost btn--sm" id="close-modal-btn">Close</button>
+    </div>
+
+    <!-- Tab nav inside modal -->
+    <div style="display:flex;gap:4px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;margin-bottom:24px;flex-wrap:wrap">
+      <button class="rte-btn active" id="modal-tab-view" onclick="switchModalTab('view')">Overview</button>
+      <button class="rte-btn" id="modal-tab-edit" onclick="switchModalTab('edit')">Edit Details</button>
+      <button class="rte-btn" id="modal-tab-pages" onclick="switchModalTab('pages')">Portal Pages</button>
+      <button class="rte-btn" id="modal-tab-credit" onclick="switchModalTab('credit')">Credits</button>
+      <button class="rte-btn" id="modal-tab-contract" onclick="switchModalTab('contract')">Contract</button>
+    </div>
+
+    <!-- Tab: Overview -->
+    <div id="modal-tab-content-view">
+      <div id="modal-overview-content"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px" id="modal-quick-actions"></div>
+    </div>
+
+    <!-- Tab: Edit -->
+    <div id="modal-tab-content-edit" style="display:none">
+      <form id="edit-client-form" novalidate>
+        <div class="grid-2" style="gap:14px">
+          <div class="form-group"><label class="form-label" for="ec-name">Full Name</label><input type="text" id="ec-name" class="form-input"></div>
+          <div class="form-group"><label class="form-label" for="ec-email">Email</label><input type="email" id="ec-email" class="form-input"></div>
+          <div class="form-group"><label class="form-label" for="ec-business">Business</label><input type="text" id="ec-business" class="form-input"></div>
+          <div class="form-group"><label class="form-label" for="ec-phone">Phone</label><input type="tel" id="ec-phone" class="form-input"></div>
+          <div class="form-group">
+            <label class="form-label" for="ec-plan">Plan</label>
+            <select id="ec-plan" class="form-select">
+              <option value="one-time">Website Launch — $300</option>
+              <option value="growth">Monthly Growth Plan — $50/mo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ec-status">Status</label>
+            <select id="ec-status" class="form-select">
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label" for="ec-notes">Internal Notes</label><textarea id="ec-notes" class="form-textarea" rows="3"></textarea></div>
+        <div class="form-group">
+          <label class="form-label" for="ec-password">Reset Password (leave blank to keep current)</label>
+          <input type="text" id="ec-password" class="form-input" placeholder="New temporary password" autocomplete="new-password">
+          <span class="form-hint">If provided, the new password is emailed to the client.</span>
+        </div>
+        <div id="edit-client-error" style="display:none;color:var(--error);font-size:.85rem;margin-bottom:12px;padding:10px;background:rgba(231,76,60,.08);border-radius:var(--radius-sm)"></div>
+        <div id="edit-client-success" style="display:none;padding:12px 16px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.3);border-radius:var(--radius);color:var(--success);font-size:.875rem;margin-bottom:12px">Client updated successfully.</div>
+        <button type="submit" class="btn btn--primary" id="save-client-btn">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Tab: Portal Pages -->
+    <div id="modal-tab-content-pages" style="display:none">
+      <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:20px">
+        Toggle which sections are visible in this client's portal. Disabled sections are hidden from the sidebar and cannot be accessed by the client.
+      </p>
+      <div id="page-toggles">
+        <!-- Populated by JS -->
+      </div>
+      <div id="pages-error" style="display:none;color:var(--error);font-size:.85rem;margin-top:12px;padding:10px;background:rgba(231,76,60,.08);border-radius:var(--radius-sm)"></div>
+      <div style="margin-top:20px;display:flex;gap:10px">
+        <button class="btn btn--primary" id="save-pages-btn">Save Page Settings</button>
+        <button class="btn btn--ghost" id="enable-all-pages-btn">Enable All</button>
+      </div>
+    </div>
+
+    <!-- Tab: Credits -->
+    <div id="modal-tab-content-credit" style="display:none">
+      <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:20px">
+        Each credit is a $25 voucher automatically applied when the client checks out via Stripe. Credits reduce the Stripe charge in real time — the client always pays the lowest possible amount. You can add or deduct any amount here.
+      </p>
+      <div style="padding:16px 20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px">
+        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Current Credit Balance</div>
+        <div id="credit-current-display" style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--success)">$0.00</div>
+        <div id="credit-num-vouchers" style="font-size:.8rem;color:var(--text-muted);margin-top:2px"></div>
+      </div>
+      <div class="grid-2" style="gap:14px;margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label" for="credit-amount">Adjustment Amount ($)</label>
+          <input type="number" id="credit-amount" class="form-input" placeholder="25.00" step="0.01">
+          <span class="form-hint">Positive = add credit. Negative = deduct credit.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="credit-presets">Quick Presets</label>
+          <select id="credit-presets" class="form-select" onchange="document.getElementById('credit-amount').value=this.value;this.value=''">
+            <option value="">Select amount...</option>
+            <option value="25">+$25 (1 referral reward)</option>
+            <option value="50">+$50 (2 referral rewards)</option>
+            <option value="75">+$75 (3 referral rewards)</option>
+            <option value="100">+$100 (4 referral rewards)</option>
+            <option value="-25">-$25 (deduct 1 credit)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="credit-note">Note (shown in email to client if adding credit)</label>
+        <input type="text" id="credit-note" class="form-input" placeholder="e.g. Referral reward for introducing ABC Corp">
+      </div>
+      <div id="credit-msg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:var(--radius);font-size:.875rem"></div>
+      <button class="btn btn--primary" id="apply-credit-btn">Apply Credit Adjustment</button>
+      <!-- Invoice credit history for this client -->
+      <div id="credit-invoice-history" style="margin-top:24px;display:none">
+        <div style="font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:10px;padding-top:20px;border-top:1px solid var(--border)">Credit Applied to Invoices</div>
+        <table class="data-table" style="font-size:.82rem" aria-label="Credit history">
+          <thead><tr><th>Invoice</th><th>Description</th><th>Credit Applied</th><th>Amount Charged</th><th>Status</th></tr></thead>
+          <tbody id="credit-invoice-history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Contract -->
+    <div id="modal-tab-content-contract" style="display:none">
+      <div id="modal-contract-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Signature viewer modal -->
+<div id="sig-viewer" class="sig-modal-overlay hidden" role="dialog" aria-modal="true">
+  <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-xl);
+    padding:32px;max-width:560px;width:100%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--text)">Recorded Signature</h3>
+      <button class="btn btn--ghost btn--sm" onclick="document.getElementById('sig-viewer').classList.add('hidden')">Close</button>
+    </div>
+    <div class="grid-2" style="gap:16px;margin-bottom:20px">
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Signed By</div><div id="sv-name" style="color:var(--text);font-weight:500">—</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px">Date &amp; Time</div><div id="sv-date" style="color:var(--text);font-weight:500">—</div></div>
+    </div>
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center">
+      <img id="sv-img" alt="Client signature" style="max-width:100%;max-height:180px;display:block;margin:0 auto">
+      <p id="sv-no-img" style="color:var(--text-muted);font-size:.875rem;padding:16px;display:none">No signature image on file.</p>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════
+//  Admin Portal — Complete Application Logic
+// ════════════════════════════════════════════════════════════════
+
+let adminToken = null, allClients = [], isDemoMode = false;
+let activeChatClientId = null, activeChatMessages = [];
+let editingClientId    = null, sigStore = {};
+let allAdminInvoices   = [];
+
+// Pages that can be toggled in the client portal
+const PORTAL_PAGES = [
+  { id:'dashboard',  label:'Dashboard',       icon:'📊', required:true  },
+  { id:'project',    label:'Project Status',  icon:'⏱',  required:false },
+  { id:'messages',   label:'Messages',        icon:'💬', required:false },
+  { id:'files',      label:'Files',           icon:'📁', required:false },
+  { id:'invoices',   label:'Invoices',        icon:'📄', required:false },
+  { id:'contract',   label:'Contract',        icon:'✍️', required:false },
+  { id:'reviews',    label:'Leave a Review',  icon:'⭐', required:false },
+  { id:'referrals',  label:'Referrals',       icon:'👥', required:false },
+  { id:'account',    label:'Account Settings',icon:'⚙️', required:false },
+];
+
+function esc(s) {
+  return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function aToast(msg, type='success') {
+  if (typeof showToast==='function') showToast(msg, type);
+  else console.log('[ADMIN]', type, msg);
+}
+
+// ── API ───────────────────────────────────────────────────────
+async function adminApi(payload) {
+  if (isDemoMode) throw new Error('DEMO_MODE');
+  const url = (typeof CONFIG!=='undefined' ? CONFIG.APPS_SCRIPT_URL : '') || '';
+  if (!url || url==='YOUR_APPS_SCRIPT_URL_HERE') throw new Error('DEMO_MODE');
+  const res = await fetch(url, {
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({...payload, adminToken}),
+  });
+  if (!res.ok) throw new Error('HTTP '+res.status);
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch { throw new Error('Invalid server response'); }
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showAdminSection(id) {
+  document.querySelectorAll('.portal-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.portal-nav__item').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('section-'+id), btn=document.querySelector(`.portal-nav__item[data-asection="${id}"]`);
+  if(sec) sec.classList.add('active');
+  if(btn) btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('admin-sidebar').classList.remove('mobile-open');
+}
+document.querySelectorAll('.portal-nav__item[data-asection]').forEach(b=>b.addEventListener('click',()=>showAdminSection(b.dataset.asection)));
+document.getElementById('admin-sidebar-toggle').addEventListener('click',()=>document.getElementById('admin-sidebar').classList.toggle('mobile-open'));
+
+// ── Auth ─────────────────────────────────────────────────────
+document.getElementById('admin-login-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email=document.getElementById('admin-email').value.trim();
+  const pass=document.getElementById('admin-password').value;
+  const btn=document.getElementById('admin-login-btn'), errEl=document.getElementById('admin-login-error');
+  errEl.style.display='none'; btn.textContent='Signing in...'; btn.disabled=true;
+
+  if(typeof IS_DEMO_MODE!=='undefined' && IS_DEMO_MODE){
+    if(email==='admin@cwo.com'&&pass==='admin123'){
+      adminToken='DEMO_ADMIN_TOKEN'; isDemoMode=true;
+      sessionStorage.setItem('cwo_admin_token',adminToken);
+      sessionStorage.setItem('cwo_admin',JSON.stringify({email,name:'Admin'}));
+      initAdminPortal(); return;
+    }
+    errEl.textContent='Demo: admin@cwo.com / admin123'; errEl.style.display='block';
+    btn.textContent='Sign In to Admin Portal'; btn.disabled=false; return;
+  }
+  const url=(typeof CONFIG!=='undefined'?CONFIG.APPS_SCRIPT_URL:'')||'';
+  try {
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({action:'adminLogin',email,password:pass}),redirect:'follow'});
+    const data=await res.json();
+    if(data.success){
+      adminToken=data.token;
+      sessionStorage.setItem('cwo_admin_token',data.token);
+      sessionStorage.setItem('cwo_admin',JSON.stringify(data.user));
+      initAdminPortal();
+    } else {
+      errEl.textContent=data.message||'Invalid credentials.'; errEl.style.display='block';
+      btn.textContent='Sign In to Admin Portal'; btn.disabled=false;
+    }
+  } catch {
+    errEl.textContent='Cannot connect. Check APPS_SCRIPT_URL in script.js.'; errEl.style.display='block';
+    btn.textContent='Sign In to Admin Portal'; btn.disabled=false;
+  }
+});
+
+document.getElementById('admin-logout-btn').addEventListener('click',()=>{
+  sessionStorage.removeItem('cwo_admin'); sessionStorage.removeItem('cwo_admin_token'); location.reload();
+});
+
+window.addEventListener('DOMContentLoaded',()=>{
+  isDemoMode=typeof IS_DEMO_MODE!=='undefined'&&IS_DEMO_MODE;
+  if(isDemoMode) document.getElementById('admin-demo-notice').style.display='block';
+  const stored=sessionStorage.getItem('cwo_admin'), token=sessionStorage.getItem('cwo_admin_token');
+  if(stored&&token){ adminToken=token; isDemoMode=isDemoMode||(token==='DEMO_ADMIN_TOKEN'); try{initAdminPortal();}catch{sessionStorage.clear();} }
+});
+
+function initAdminPortal(){
+  document.getElementById('admin-login-screen').classList.add('hidden');
+  document.getElementById('admin-app').classList.remove('hidden');
+  document.getElementById('admin-role-badge').style.display='inline';
+  if(isDemoMode) document.getElementById('admin-demo-bar').style.display='block';
+  loadAnalytics(); loadClients(); loadAllReviews(); loadAllReferrals(); loadMailingList();
+  loadAllContracts(); loadAllInvoices(); loadAllFiles(); loadConsultations();
+}
+
+// ── Analytics ─────────────────────────────────────────────────
+async function loadAnalytics(){
+  if(isDemoMode){renderAnalytics({});return;}
+  try{const d=await adminApi({action:'getAnalytics'});if(d.success)renderAnalytics(d);}
+  catch(err){if(err.message!=='DEMO_MODE')aToast('Analytics unavailable.','error');renderAnalytics({});}
+}
+function renderAnalytics(d){
+  setText('a-clients',d.totalClients??'—');
+  setText('a-revenue',d.monthlyRevenue!=null?'$'+d.monthlyRevenue:'—');
+  setText('a-projects',d.activeProjects??'—');
+  setText('a-reviews',d.pendingReviews??'—');
+  setText('a-total-rev',d.paidRevenue?'$'+d.paidRevenue:'—');
+  setText('a-consults',d.consultations??'—');
+  setText('a-subs',d.subscribers??'—');
+  setText('a-refs',d.referrals??'—');
+  setText('a-outstanding',d.outstanding!=null?'$'+d.outstanding:'—');
+  setText('a-paid-month',d.paidThisMonth!=null?'$'+d.paidThisMonth:'—');
+
+  // Outstanding note
+  const outNote = document.getElementById('a-outstanding-note');
+  if (outNote && d.overdueCount != null) {
+    outNote.textContent = d.overdueCount > 0 ? d.overdueCount + ' overdue' : d.unpaidCount + ' unpaid';
+    outNote.style.color = d.overdueCount > 0 ? 'var(--error)' : 'var(--warning)';
+  }
+
+  const mp=d.monthlyPct||0, op=d.onetimePct||0;
+  setText('a-monthly-pct',mp+'%'); setText('a-onetime-pct',op+'%');
+  if(d.pendingReviews>0){setText('review-badge',d.pendingReviews);document.getElementById('review-badge').style.display='inline';}
+  setTimeout(()=>{
+    const mb=document.getElementById('a-monthly-bar'),ob=document.getElementById('a-onetime-bar');
+    if(mb) mb.style.width=mp+'%'; if(ob) ob.style.width=op+'%';
+  },200);
+  const al=document.getElementById('activity-list');
+  al.innerHTML=d.activity&&d.activity.length?d.activity.map(a=>`
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:6px;flex-shrink:0"></div>
+      <div><div style="font-size:.875rem;color:var(--text)">${esc(a.text)}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">${esc(a.time||'')}</div></div>
+    </div>`).join(''):'<div class="empty-state">No activity yet.</div>';
+}
+document.getElementById('refresh-analytics-btn').addEventListener('click',loadAnalytics);
+
+// ── Clients ───────────────────────────────────────────────────
+async function loadClients(){
+  if(isDemoMode){allClients=[];renderClients([]);populateDropdowns([]);return;}
+  try{
+    const d=await adminApi({action:'getClients'});
+    if(d.success){
+      allClients=d.clients||[];
+      renderClients(allClients);
+      populateDropdowns(allClients);
+      const label=document.getElementById('client-count-label');
+      if(label) label.textContent=allClients.length+' client'+(allClients.length!==1?'s':'');
+    }
+    else aToast('Could not load clients: '+d.message,'error');
+  }catch(err){if(err.message!=='DEMO_MODE')aToast('Backend connection failed.','error');allClients=[];renderClients([]);populateDropdowns([]);}
+}
+
+function renderClients(list){
+  const tbody=document.getElementById('clients-tbody');
+  tbody.innerHTML=list.length?list.map(c=>`
+    <tr class="client-row">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--gold-dim);
+            border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;
+            font-size:.72rem;font-weight:700;color:var(--gold);flex-shrink:0">
+            ${esc((c.name||'??').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2))}</div>
+          <div>
+            <div style="color:var(--text);font-weight:500;font-size:.9rem">${esc(c.name)}</div>
+            <div style="font-size:.75rem;color:var(--text-muted)">${esc(c.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge badge--${c.plan==='growth'?'gold':'info'}">${c.plan==='growth'?'$50/mo':'$300'}</span></td>
+      <td><span class="status-dot ${esc(c.status||'pending')}"></span>${esc(ucfirst(c.status||'pending'))}</td>
+      <td style="color:var(--text-secondary)">${esc(c.stage||'—')}</td>
+      <td>${(c.referralCredit>0)?`<span class="credit-badge">$${parseFloat(c.referralCredit).toFixed(2)} credit</span>`:'<span style="color:var(--text-muted);font-size:.8rem">—</span>'}</td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(c.since||'—')}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn--ghost btn--sm" onclick="openClientModal('${esc(c.id)}','view')">View</button>
+          <button class="btn btn--ghost btn--sm" onclick="openClientModal('${esc(c.id)}','edit')">Edit</button>
+          <button class="btn btn--ghost btn--sm" onclick="startChatWith('${esc(c.id)}','${esc(c.name)}')">Msg</button>
+          <button class="btn btn--ghost btn--sm" style="color:var(--success);border-color:rgba(46,204,113,.3)" onclick="quickAddCredit('${esc(c.id)}','${esc(c.name)}',this)" title="Add $25 credit">+$25</button>
+        </div>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">No clients yet.</td></tr>';
+}
+
+function populateDropdowns(clients){
+  const opts=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)} — ${esc(c.business||c.email)}</option>`).join('');
+  ['ps-client','admin-file-client','inv-client'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML='<option value="" disabled selected>Select client...</option>'+opts;
+  });
+  renderProjectsList(clients);
+  renderConversationList(clients);
+  populateEmailClientSelect(clients);
+}
+
+function renderProjectsList(clients){
+  const active=clients.filter(c=>c.status==='active');
+  document.getElementById('projects-tbody').innerHTML=active.length?active.map(c=>`
+    <tr>
+      <td style="color:var(--text)">${esc(c.name)}</td>
+      <td style="color:var(--text-secondary)">${esc(c.business||'—')}</td>
+      <td><span class="badge badge--info">${esc(c.stage||'—')}</span></td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(c.lastUpdated||'—')}</td>
+      <td><button class="btn btn--ghost btn--sm" onclick="document.getElementById('ps-client').value='${esc(c.id)}';showAdminSection('project-status')">Update</button></td>
+    </tr>`).join(''):'<tr><td colspan="5" class="empty-state">No active projects.</td></tr>';
+}
+
+document.getElementById('client-search').addEventListener('input',filterClients);
+document.getElementById('client-filter').addEventListener('change',filterClients);
+function filterClients(){
+  const q=document.getElementById('client-search').value.toLowerCase();
+  const f=document.getElementById('client-filter').value;
+  const filtered=allClients.filter(c=>{
+    const t=(c.name||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)||(c.business||'').toLowerCase().includes(q);
+    return t&&(f==='all'||c.status===f);
+  });
+  renderClients(filtered);
+  const label=document.getElementById('client-count-label');
+  if(label) label.textContent=filtered.length+' client'+(filtered.length!==1?'s':'')+(q||f!=='all'?' shown':'');
+}
+document.getElementById('refresh-clients-btn').addEventListener('click',loadClients);
+document.getElementById('export-clients-btn').addEventListener('click',()=>{
+  exportCSV(allClients,'cwo-clients',['name','email','business','phone','plan','status','stage','referralCode','referralCredit','since']);
+});
+
+// ── Client Modal ──────────────────────────────────────────────
+function switchModalTab(tab){
+  ['view','edit','pages','credit','contract'].forEach(t=>{
+    document.getElementById('modal-tab-content-'+t).style.display=t===tab?'block':'none';
+    const btn=document.getElementById('modal-tab-'+t);
+    if(btn) btn.classList.toggle('active',t===tab);
+  });
+}
+
+async function openClientModal(id, tab='view'){
+  const c=allClients.find(x=>x.id===id);
+  if(!c) return;
+  editingClientId=id;
+  document.getElementById('modal-title').textContent=c.name+(c.business?' — '+c.business:'');
+
+  // Overview tab
+  document.getElementById('modal-overview-content').innerHTML=`
+    <div class="grid-2" style="gap:16px;margin-bottom:16px">
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Email</div><div style="color:var(--text)">${esc(c.email)}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Phone</div><div style="color:var(--text)">${esc(c.phone||'—')}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Plan</div><span class="badge badge--gold">${c.plan==='growth'?'$50/mo':'$300'}</span></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Status</div><span class="status-dot ${esc(c.status||'pending')}"></span>${esc(ucfirst(c.status||'pending'))}</div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Stage</div><span class="badge badge--info">${esc(c.stage||'—')}</span></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Referral Code</div><div style="color:var(--gold);font-weight:600">${esc(c.referralCode||'—')}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Client Since</div><div style="color:var(--text)">${esc(c.since||'—')}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Referral Credit</div><div style="color:var(--success);font-weight:600">$${parseFloat(c.referralCredit||0).toFixed(2)}</div></div>
+    </div>
+    ${c.notes?`<div style="padding:12px 16px;background:var(--bg-surface);border-radius:var(--radius);font-size:.85rem;color:var(--text-secondary)"><strong style="color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">Notes: </strong>${esc(c.notes)}</div>`:''}`;
+
+  document.getElementById('modal-quick-actions').innerHTML=`
+    <button class="btn btn--outline btn--sm" onclick="startChatWith('${esc(c.id)}','${esc(c.name)}');closeModal()">Message</button>
+    <button class="btn btn--ghost btn--sm" onclick="document.getElementById('ps-client').value='${esc(c.id)}';showAdminSection('project-status');closeModal()">Update Stage</button>
+    <button class="btn btn--ghost btn--sm" onclick="document.getElementById('inv-client').value='${esc(c.id)}';document.getElementById('client-credit-preview').style.display='none';const cl=allClients.find(x=>x.id==='${esc(c.id)}');if(cl&&parseFloat(cl.referralCredit||0)>0){document.getElementById('client-credit-preview').textContent='This client has $'+parseFloat(cl.referralCredit).toFixed(2)+' credit that will be applied at checkout.';document.getElementById('client-credit-preview').style.display='block';}showAdminSection('invoices');closeModal()">Generate Invoice</button>
+    <button class="btn btn--ghost btn--sm" style="color:var(--success);border-color:rgba(46,204,113,.3)" onclick="switchModalTab('credit')">Adjust Credit</button>`;
+
+  // Edit tab pre-fill
+  document.getElementById('ec-name').value=c.name||'';
+  document.getElementById('ec-email').value=c.email||'';
+  document.getElementById('ec-business').value=c.business||'';
+  document.getElementById('ec-phone').value=c.phone||'';
+  document.getElementById('ec-plan').value=c.plan||'growth';
+  document.getElementById('ec-status').value=c.status||'active';
+  document.getElementById('ec-notes').value=c.notes||'';
+  document.getElementById('ec-password').value='';
+  document.getElementById('edit-client-error').style.display='none';
+  document.getElementById('edit-client-success').style.display='none';
+
+  // Pages tab
+  await loadPageToggles(c.id);
+
+  // Credit tab — show current balance and voucher count
+  const creditDisplay = document.getElementById('credit-current-display');
+  const creditVouchers = document.getElementById('credit-num-vouchers');
+  const bal = parseFloat(c.referralCredit || 0);
+  if (creditDisplay) creditDisplay.textContent = '$' + bal.toFixed(2);
+  if (creditVouchers) {
+    const n = Math.floor(bal / 25);
+    creditVouchers.textContent = n > 0
+      ? n + ' voucher' + (n > 1 ? 's' : '') + ' ($25 each) + $' + (bal % 25).toFixed(2) + ' partial'
+      : bal > 0 ? 'Partial credit (less than one $25 voucher)' : 'No credit balance';
+  }
+  const creditAmtEl = document.getElementById('credit-amount');
+  const creditNoteEl = document.getElementById('credit-note');
+  const creditMsgEl  = document.getElementById('credit-msg');
+  if (creditAmtEl)  creditAmtEl.value  = '';
+  if (creditNoteEl) creditNoteEl.value = '';
+  if (creditMsgEl)  creditMsgEl.style.display = 'none';
+
+  // Load credit invoice history for this client
+  const histSection = document.getElementById('credit-invoice-history');
+  const histTbody   = document.getElementById('credit-invoice-history-tbody');
+  const clientInvs  = allAdminInvoices.filter(i => i.clientId === c.id && parseFloat(i.creditApplied || 0) > 0);
+  if (clientInvs.length > 0 && histSection && histTbody) {
+    histTbody.innerHTML = clientInvs.map(i => `
+      <tr>
+        <td style="color:var(--text);font-weight:500">${esc(i.number)}</td>
+        <td>${esc(i.description)}</td>
+        <td><span class="credit-badge">-$${parseFloat(i.creditApplied).toFixed(2)}</span></td>
+        <td style="color:var(--text)">$${parseFloat(i.amount||0).toFixed(2)}</td>
+        <td><span class="badge badge--${i.status==='paid'?'success':'warning'}">${esc(ucfirst(i.status||'—'))}</span></td>
+      </tr>`).join('');
+    histSection.style.display = 'block';
+  } else if (histSection) {
+    histSection.style.display = 'none';
+  }
+
+  // Contract tab
+  const contract=sigStore[c.id];
+  renderContractTab(contract, c);
+
+  switchModalTab(tab);
+  document.getElementById('client-modal').classList.remove('hidden');
+}
+
+function renderContractTab(contract, client){
+  const el=document.getElementById('modal-contract-content');
+  const isSigned=contract&&contract.status==='signed';
+  el.innerHTML=`
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <span class="badge badge--${isSigned?'success':'warning'}">${isSigned?'Signed':'Awaiting Signature'}</span>
+        ${isSigned?`<span style="font-size:.85rem;color:var(--text-muted)">Signed by ${esc(contract.signerName||'—')} on ${esc(contract.signedDate||'—')}</span>`:''}
+      </div>
+      ${isSigned&&contract.signatureData?`
+        <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:16px;text-align:center">
+          <img src="${esc(contract.signatureData)}" alt="Signature" style="max-width:100%;max-height:120px">
+        </div>`:''}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:20px">
+      <div class="portal-card__title" style="margin-bottom:16px">Admin Actions</div>
+      ${isSigned?`
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:10px">Update the recorded signer name or date if there was an error:</p>
+            <div class="grid-2" style="gap:10px;margin-bottom:10px">
+              <div class="form-group" style="margin-bottom:0"><label class="form-label" for="ct-signer">Signer Name</label><input type="text" id="ct-signer" class="form-input" value="${esc(contract.signerName||'')}" placeholder="Signer name"></div>
+              <div class="form-group" style="margin-bottom:0"><label class="form-label" for="ct-date">Signed Date</label><input type="text" id="ct-date" class="form-input" value="${esc(contract.signedDate||'')}" placeholder="e.g. Jan 1, 2025"></div>
+            </div>
+            <button class="btn btn--outline btn--sm" onclick="updateContractDetails()">Save Changes</button>
+          </div>
+          <div style="padding-top:12px;border-top:1px solid var(--border)">
+            <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:10px">Void this contract and request a fresh signature from the client:</p>
+            <button class="btn btn--danger btn--sm" onclick="voidContract()">Void &amp; Request Re-Sign</button>
+          </div>
+        </div>`:`
+        <p style="font-size:.875rem;color:var(--text-muted)">
+          The client has not yet signed their agreement. They can sign in the Contract section of their portal.
+          Alternatively, you can record a manual contract completion below.
+        </p>
+        <div class="grid-2" style="gap:10px;margin:12px 0">
+          <div class="form-group" style="margin-bottom:0"><label class="form-label" for="ct-signer">Signer Name</label><input type="text" id="ct-signer" class="form-input" placeholder="Full legal name"></div>
+          <div class="form-group" style="margin-bottom:0"><label class="form-label" for="ct-date">Date</label><input type="text" id="ct-date" class="form-input" placeholder="${new Date().toLocaleDateString()}"></div>
+        </div>
+        <button class="btn btn--primary btn--sm" onclick="manuallySignContract()">Record Manual Signature</button>`}
+    <div id="contract-tab-msg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:var(--radius);font-size:.85rem"></div>
+  </div>`;
+}
+
+async function updateContractDetails(){
+  const signerName=document.getElementById('ct-signer').value.trim();
+  const signedDate=document.getElementById('ct-date').value.trim();
+  if(!signerName||!signedDate){aToast('Signer name and date are required.','error');return;}
+  if(isDemoMode){showContractTabMsg('Demo mode — not saved.','info');return;}
+  try{
+    const d=await adminApi({action:'updateContract',clientId:editingClientId,signerName,signedDate,contractAction:'update'});
+    if(d.success){showContractTabMsg('Contract details updated.','success');loadAllContracts();}
+    else showContractTabMsg(d.message||'Update failed.','error');
+  }catch{showContractTabMsg('Connection error.','error');}
+}
+
+async function manuallySignContract(){
+  const signerName=document.getElementById('ct-signer').value.trim();
+  const signedDate=document.getElementById('ct-date').value.trim()||new Date().toLocaleDateString();
+  if(!signerName){aToast('Please enter the signer name.','error');return;}
+  if(isDemoMode){showContractTabMsg('Demo mode — not saved.','info');return;}
+  try{
+    const d=await adminApi({action:'updateContract',clientId:editingClientId,signerName,signedDate,contractAction:'update'});
+    if(d.success){showContractTabMsg('Contract recorded.','success');loadAllContracts();}
+    else showContractTabMsg(d.message||'Failed.','error');
+  }catch{showContractTabMsg('Connection error.','error');}
+}
+
+async function voidContract(){
+  if(!confirm('Void this contract? The client will be asked to re-sign.')) return;
+  if(isDemoMode){showContractTabMsg('Demo mode — not voided.','info');return;}
+  try{
+    const d=await adminApi({action:'updateContract',clientId:editingClientId,contractAction:'void'});
+    if(d.success){showContractTabMsg('Contract voided. Client notified by email.','success');loadAllContracts();}
+    else showContractTabMsg(d.message||'Failed.','error');
+  }catch{showContractTabMsg('Connection error.','error');}
+}
+
+function showContractTabMsg(msg,type){
+  const el=document.getElementById('contract-tab-msg');
+  el.style.display='block';
+  el.style.background=type==='success'?'rgba(46,204,113,.1)':type==='error'?'rgba(231,76,60,.1)':'rgba(201,168,76,.1)';
+  el.style.color=type==='success'?'var(--success)':type==='error'?'var(--error)':'var(--gold)';
+  el.textContent=msg;
+}
+
+// ── Page Toggles ──────────────────────────────────────────────
+async function loadPageToggles(clientId){
+  let disabled=[];
+  if(!isDemoMode){
+    try{
+      const d=await adminApi({action:'getClientSettings',clientId});
+      if(d.success) disabled=d.disabledSections||[];
+    }catch{}
+  }
+  const container=document.getElementById('page-toggles');
+  container.innerHTML=PORTAL_PAGES.map(page=>`
+    <div class="page-toggle-row">
+      <div>
+        <div style="font-size:.9rem;font-weight:500;color:var(--text)">${esc(page.icon)} ${esc(page.label)}</div>
+        ${page.required?'<div style="font-size:.75rem;color:var(--text-muted)">Always visible — cannot be disabled</div>':''}
+      </div>
+      <label class="toggle-switch" ${page.required?'style="opacity:.4;pointer-events:none"':''}>
+        <input type="checkbox" id="toggle-${esc(page.id)}" ${!disabled.includes(page.id)?'checked':''} ${page.required?'disabled':''}>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`).join('');
+}
+
+document.getElementById('save-pages-btn').addEventListener('click', async ()=>{
+  const disabled=PORTAL_PAGES.filter(p=>!p.required&&!document.getElementById('toggle-'+p.id)?.checked).map(p=>p.id);
+  const errEl=document.getElementById('pages-error');
+  errEl.style.display='none';
+  if(isDemoMode){aToast('Demo mode — settings not saved.','info');return;}
+  try{
+    const d=await adminApi({action:'updateClientSettings',clientId:editingClientId,disabledSections:disabled});
+    if(d.success) aToast('Portal page settings saved.','success');
+    else{errEl.textContent=d.message||'Save failed.'; errEl.style.display='block';}
+  }catch{errEl.textContent='Connection error.'; errEl.style.display='block';}
+});
+
+document.getElementById('enable-all-pages-btn').addEventListener('click',()=>{
+  PORTAL_PAGES.filter(p=>!p.required).forEach(p=>{
+    const el=document.getElementById('toggle-'+p.id);
+    if(el) el.checked=true;
+  });
+});
+
+// ── Edit Client Form ──────────────────────────────────────────
+document.getElementById('edit-client-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const errEl=document.getElementById('edit-client-error'), succEl=document.getElementById('edit-client-success');
+  errEl.style.display='none'; succEl.style.display='none';
+  if(isDemoMode){succEl.style.display='block';return;}
+  const payload={action:'updateClient',clientId:editingClientId,
+    name:document.getElementById('ec-name').value.trim(),
+    email:document.getElementById('ec-email').value.trim(),
+    business:document.getElementById('ec-business').value.trim(),
+    phone:document.getElementById('ec-phone').value.trim(),
+    plan:document.getElementById('ec-plan').value,
+    status:document.getElementById('ec-status').value,
+    notes:document.getElementById('ec-notes').value.trim(),
+  };
+  const newPw=document.getElementById('ec-password').value.trim();
+  if(newPw) payload.newPassword=newPw;
+  const btn=document.getElementById('save-client-btn');
+  btn.textContent='Saving...'; btn.disabled=true;
+  try{
+    const d=await adminApi(payload);
+    if(d.success){
+      succEl.style.display='block';
+      // Update local cache
+      const idx=allClients.findIndex(c=>c.id===editingClientId);
+      if(idx>-1){
+        Object.assign(allClients[idx],{
+          name:payload.name, email:payload.email, business:payload.business,
+          phone:payload.phone, plan:payload.plan, status:payload.status, notes:payload.notes,
+        });
+        renderClients(allClients);
+        renderProjectsList(allClients);
+      }
+    } else {errEl.textContent=d.message||'Update failed.'; errEl.style.display='block';}
+  }catch{errEl.textContent='Connection error.'; errEl.style.display='block';}
+  btn.textContent='Save Changes'; btn.disabled=false;
+});
+
+function closeModal(){document.getElementById('client-modal').classList.add('hidden');}
+document.getElementById('close-modal-btn').addEventListener('click',closeModal);
+document.getElementById('client-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// ── Create Client ─────────────────────────────────────────────
+document.getElementById('create-client-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const errEl=document.getElementById('create-client-error');
+  const name=document.getElementById('cc-name').value.trim(), email=document.getElementById('cc-email').value.trim();
+  const biz=document.getElementById('cc-business').value.trim(), plan=document.getElementById('cc-plan').value;
+  const pass=document.getElementById('cc-password').value.trim();
+  errEl.style.display='none';
+  if(!name||!email||!biz||!plan||!pass){errEl.textContent='All required fields must be filled.';errEl.style.display='block';return;}
+  if(isDemoMode){aToast('Demo mode — client not saved.','info');return;}
+  const btn=document.getElementById('create-client-btn'); btn.textContent='Creating...'; btn.disabled=true;
+  try{
+    const d=await adminApi({action:'createClient',name,email,business:biz,
+      phone:document.getElementById('cc-phone').value.trim(),plan,
+      status:document.getElementById('cc-status').value,password:pass,
+      notes:document.getElementById('cc-notes').value.trim()});
+    if(d.success){aToast('Client created. Welcome email sent.','success');e.target.reset();loadClients();}
+    else{errEl.textContent=d.message||'Failed.';errEl.style.display='block';}
+  }catch{errEl.textContent='Connection error.';errEl.style.display='block';}
+  btn.textContent='Create Client Account'; btn.disabled=false;
+});
+
+// ── Project Status ────────────────────────────────────────────
+document.getElementById('update-status-btn').addEventListener('click', async ()=>{
+  const clientId=document.getElementById('ps-client').value, stage=document.getElementById('ps-stage').value;
+  const note=document.getElementById('ps-note').value.trim();
+  if(!clientId){aToast('Please select a client.','error');return;}
+  if(isDemoMode){aToast('Demo mode — not saved.','info');return;}
+  const btn=document.getElementById('update-status-btn'); btn.textContent='Updating...'; btn.disabled=true;
+  try{
+    const d=await adminApi({action:'updateProjectStatus',clientId,stage,note});
+    if(d.success){aToast('Status updated and client notified.','success');loadClients();}
+    else aToast(d.message||'Update failed.','error');
+  }catch{aToast('Connection error.','error');}
+  btn.textContent='Update Status'; btn.disabled=false;
+});
+
+// ── Messages ──────────────────────────────────────────────────
+function renderConversationList(clients){
+  const list=document.getElementById('conversation-list');
+  list.innerHTML=clients.length?clients.map(c=>`
+    <div onclick="startChatWith('${esc(c.id)}','${esc(c.name)}')"
+      style="display:flex;gap:10px;align-items:center;padding:12px;border-radius:var(--radius);
+        cursor:pointer;transition:background var(--transition)"
+      onmouseenter="this.style.background='var(--bg-card)'" onmouseleave="this.style.background='transparent'">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--gold-dim);
+        display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;
+        color:var(--gold);flex-shrink:0">
+        ${esc((c.name||'??').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2))}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.875rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.name)}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.business||c.email)}</div>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No clients yet.</div>';
+}
+
+async function startChatWith(clientId,clientName){
+  showAdminSection('messages');
+  activeChatClientId=clientId;
+  document.getElementById('chat-header').textContent=clientName;
+  document.getElementById('admin-chat-input').disabled=false;
+  document.getElementById('admin-send-btn').disabled=false;
+  if(isDemoMode){activeChatMessages=[];renderAdminMessages();return;}
+  try{const d=await adminApi({action:'getMessages',clientId});activeChatMessages=d.success?(d.messages||[]): [];}
+  catch{activeChatMessages=[];}
+  renderAdminMessages();
+}
+
+function renderAdminMessages(){
+  const c=document.getElementById('admin-chat-messages');
+  c.innerHTML=activeChatMessages.length?activeChatMessages.map(m=>`
+    <div class="chat-message ${m.from==='admin'?'chat-message--self':''}">
+      ${m.from!=='admin'?`<div class="portal-sidebar__avatar" style="width:32px;height:32px;font-size:.7rem;flex-shrink:0">${esc((m.name||'C').slice(0,1))}</div>`:''}
+      <div>
+        ${m.from!=='admin'?`<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:4px">${esc(m.name||'Client')}</div>`:''}
+        <div class="chat-bubble">${esc(m.text)}</div>
+        <div class="chat-time">${esc(m.time||'')}</div>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No messages yet.</div>';
+  c.scrollTop=c.scrollHeight;
+}
+
+document.getElementById('admin-send-btn').addEventListener('click',adminSend);
+document.getElementById('admin-chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();adminSend();}});
+async function adminSend(){
+  const input=document.getElementById('admin-chat-input');
+  const text=input.value.trim();
+  if(!text||!activeChatClientId) return;
+  const msg={from:'admin',name:'CWO Team',text,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})};
+  activeChatMessages.push(msg); renderAdminMessages(); input.value='';
+  if(!isDemoMode){try{await adminApi({action:'sendMessage',clientId:activeChatClientId,message:msg,role:'admin'});}catch{}}
+}
+
+// ── Files ─────────────────────────────────────────────────────
+document.getElementById('admin-upload-btn').addEventListener('click',()=>document.getElementById('admin-file-input').click());
+document.getElementById('admin-file-input').addEventListener('change', async e=>{
+  const clientId=document.getElementById('admin-file-client').value;
+  if(!clientId){aToast('Please select a client first.','error');return;}
+  if(isDemoMode){aToast('Demo mode — file not saved.','info');return;}
+  for(const file of e.target.files){
+    const reader=new FileReader();
+    await new Promise(res=>{
+      reader.onload=async()=>{
+        const b64=reader.result.split(',')[1];
+        try{await adminApi({action:'uploadFile',clientId,fileName:file.name,fileData:b64,
+          mimeType:file.type,size:file.size>1048576?(file.size/1048576).toFixed(1)+' MB':Math.round(file.size/1024)+' KB',uploadedBy:'admin'});}
+        catch(err){console.warn('upload:',err.message);}
+        res();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  aToast('Files uploaded.','success'); e.target.value=''; loadAllFiles();
+});
+
+async function loadAllFiles(){
+  if(isDemoMode){document.getElementById('admin-files-tbody').innerHTML='<tr><td colspan="7" class="empty-state">No files yet.</td></tr>';return;}
+  try{const d=await adminApi({action:'getFiles'});renderAllFiles(d.success?(d.files||[]):[]);}
+  catch{renderAllFiles([]);}
+}
+
+function renderAllFiles(files){
+  const cmap=Object.fromEntries(allClients.map(c=>[c.id,c.name]));
+  document.getElementById('admin-files-tbody').innerHTML=files.length?files.map(f=>`
+    <tr>
+      <td style="color:var(--text)">${esc(cmap[f.clientId]||f.clientId)}</td>
+      <td>${esc(f.name)}</td>
+      <td><span class="badge badge--gold">${esc(f.ext||'FILE')}</span></td>
+      <td style="color:var(--text-muted);font-size:.8rem">${esc(f.uploadedBy==='admin'?'CWO Team':'Client')}</td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(f.date||'—')}</td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(f.size||'—')}</td>
+      <td>${f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener" class="btn btn--ghost btn--sm">Download</a>`:'—'}</td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">No files yet.</td></tr>';
+}
+
+// ── Invoices ──────────────────────────────────────────────────
+// Show credit preview when client is selected
+document.getElementById('inv-client').addEventListener('change',function(){
+  const c=allClients.find(x=>x.id===this.value);
+  const preview=document.getElementById('client-credit-preview');
+  if(c&&parseFloat(c.referralCredit||0)>0){
+    preview.textContent='This client has $'+parseFloat(c.referralCredit).toFixed(2)+' referral credit that will be automatically deducted from this invoice.';
+    preview.style.display='block';
+  } else {preview.style.display='none';}
+});
+
+document.getElementById('invoice-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const clientId=document.getElementById('inv-client').value, amount=document.getElementById('inv-amount').value;
+  const desc=document.getElementById('inv-desc').value.trim(), due=document.getElementById('inv-due').value;
+  const stripe=document.getElementById('inv-stripe').value.trim();
+  if(!clientId||!amount||!desc||!due){aToast('All required fields must be filled.','error');return;}
+  if(isDemoMode){aToast('Demo mode — invoice not saved.','info');return;}
+  const btn=document.getElementById('gen-invoice-btn'); btn.textContent='Generating...'; btn.disabled=true;
+  try{
+    const d=await adminApi({action:'createInvoice',clientId,amount:parseFloat(amount),description:desc,dueDate:due,stripeLink:stripe});
+    if(d.success){
+      let msg='Invoice '+d.number+' created and emailed.';
+      if(parseFloat(d.creditApplied)>0) msg+=' $'+d.creditApplied+' credit applied — client charged $'+d.finalAmount+'.';
+      aToast(msg,'success');
+      e.target.reset(); document.getElementById('client-credit-preview').style.display='none';
+      loadAllInvoices(); loadClients(); // reload clients to update credit balance
+    } else aToast(d.message||'Failed.','error');
+  }catch{aToast('Connection error.','error');}
+  btn.textContent='Generate & Email Invoice'; btn.disabled=false;
+});
+
+async function loadAllInvoices(){
+  if(isDemoMode){document.getElementById('admin-invoices-tbody').innerHTML='<tr><td colspan="8" class="empty-state">No invoices yet.</td></tr>';return;}
+  try{const d=await adminApi({action:'getAllInvoices'});
+    allAdminInvoices=d.success?(d.invoices||[]):[];
+    renderAllInvoices(allAdminInvoices);}
+  catch{renderAllInvoices([]);}
+}
+
+function renderAllInvoices(invs){
+  const q=(document.getElementById('inv-search')?.value||'').toLowerCase();
+  const statusF=document.getElementById('inv-status-filter')?.value||'all';
+  const today=new Date(); today.setHours(0,0,0,0);
+
+  const filtered=invs.filter(inv=>{
+    const matchQ=!q||(inv.number||'').toLowerCase().includes(q)||
+      (inv.clientName||'').toLowerCase().includes(q)||(inv.description||'').toLowerCase().includes(q);
+    if(!matchQ) return false;
+    if(statusF==='all') return true;
+    if(statusF==='paid') return inv.status==='paid';
+    if(statusF==='due')  return inv.status!=='paid';
+    if(statusF==='overdue'){
+      if(inv.status==='paid') return false;
+      if(!inv.dueDate) return false;
+      const d=new Date(inv.dueDate);
+      return !isNaN(d.getTime())&&d<today;
+    }
+    return true;
+  });
+
+  document.getElementById('admin-invoices-tbody').innerHTML=filtered.length?filtered.map(inv=>{
+    let isOverdue=false;
+    if(inv.status!=='paid'&&inv.dueDate){
+      const d=new Date(inv.dueDate);
+      if(!isNaN(d.getTime())&&d<today) isOverdue=true;
+    }
+    let statusBadge;
+    if(inv.status==='paid'){
+      statusBadge=`<span class="badge badge--success">Paid</span>`;
+    } else if(isOverdue){
+      statusBadge=`<span class="badge" style="background:rgba(231,76,60,.1);color:var(--error);border:1px solid rgba(231,76,60,.3)">Overdue</span>`;
+    } else {
+      statusBadge=`<span class="badge badge--warning">Due</span>`;
+    }
+    const dateCell=inv.status==='paid'
+      ?`<span style="color:var(--success);font-size:.85rem">Paid ${esc(inv.paidDate||'')}</span>`
+      :`<span style="color:${isOverdue?'var(--error)':'var(--text-muted)'};">${esc(inv.dueDate||'—')}</span>`;
+    return `<tr>
+      <td style="color:var(--text);font-weight:500">${esc(inv.number)}</td>
+      <td>${esc(inv.clientName||'—')}</td>
+      <td>${esc(inv.description)}</td>
+      <td style="color:var(--text)">$${parseFloat(inv.amount||0).toFixed(2)}</td>
+      <td>${parseFloat(inv.creditApplied||0)>0?`<span class="credit-badge">-$${parseFloat(inv.creditApplied).toFixed(2)}</span>`:'<span style="color:var(--text-muted);font-size:.8rem">—</span>'}</td>
+      <td>${statusBadge}</td>
+      <td>${dateCell}</td>
+      <td>${inv.status!=='paid'?`<button class="btn btn--success btn--sm" onclick="markPaid('${esc(inv.number)}',this)">Mark Paid</button>`:'<span style="color:var(--success);font-size:.8rem">✓ Paid</span>'}</td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="8" class="empty-state">No invoices match the current filter.</td></tr>';
+}
+
+// Wire up invoice search/filter
+document.addEventListener('DOMContentLoaded',()=>{
+  const invSearch=document.getElementById('inv-search');
+  const invFilter=document.getElementById('inv-status-filter');
+  const invRefresh=document.getElementById('refresh-invoices-btn');
+  const invExport=document.getElementById('export-invoices-btn');
+  if(invSearch) invSearch.addEventListener('input',()=>renderAllInvoices(allAdminInvoices));
+  if(invFilter) invFilter.addEventListener('change',()=>renderAllInvoices(allAdminInvoices));
+  if(invRefresh) invRefresh.addEventListener('click',loadAllInvoices);
+  if(invExport) invExport.addEventListener('click',()=>{
+    exportCSV(allAdminInvoices,'cwo-invoices',['number','clientName','description','amount','creditApplied','status','dueDate','paidDate']);
+  });
+});
+
+async function markPaid(number,btn){
+  if(isDemoMode){aToast('Demo mode.','info');return;}
+  btn.textContent='...'; btn.disabled=true;
+  try{
+    const d=await adminApi({action:'markInvoicePaid',invoiceNumber:number});
+    if(d.success){aToast('Invoice marked as paid.','success');loadAllInvoices();}
+    else{aToast(d.message||'Failed.','error');btn.textContent='Mark Paid';btn.disabled=false;}
+  }catch{aToast('Error.','error');btn.textContent='Mark Paid';btn.disabled=false;}
+}
+
+// ── Contracts ─────────────────────────────────────────────────
+async function loadAllContracts(){
+  if(isDemoMode){document.getElementById('contracts-tbody').innerHTML='<tr><td colspan="6" class="empty-state">No contracts yet.</td></tr>';return;}
+  try{const d=await adminApi({action:'getAllContracts'});if(d.success)renderContracts(d.contracts||[]);}
+  catch{renderContracts([]);}
+}
+
+function renderContracts(list){
+  list.forEach(c=>{if(c.clientId) sigStore[c.clientId]=c;});
+  document.getElementById('contracts-tbody').innerHTML=list.length?list.map(c=>`
+    <tr>
+      <td style="color:var(--text);font-weight:500">${esc(c.clientName||'—')}</td>
+      <td>${esc(c.business||'—')}</td>
+      <td style="color:var(--text-muted)">${esc(c.signerName||'—')}</td>
+      <td><span class="badge badge--${c.status==='signed'?'success':'warning'}">${c.status==='signed'?'Signed':'Awaiting'}</span></td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(c.signedDate||'—')}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${c.status==='signed'?`<button class="btn btn--ghost btn--sm" onclick="viewSig('${esc(c.clientId)}')">View Sig</button>`:''}
+          <button class="btn btn--ghost btn--sm" onclick="openClientModal('${esc(c.clientId)}','contract')">Edit</button>
+        </div>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="6" class="empty-state">No clients yet.</td></tr>';
+}
+
+function viewSig(clientId){
+  const c=sigStore[clientId];
+  if(!c) return;
+  document.getElementById('sv-name').textContent=c.signerName||'—';
+  document.getElementById('sv-date').textContent=c.signedDate||'—';
+  const img=document.getElementById('sv-img'), noImg=document.getElementById('sv-no-img');
+  if(c.signatureData&&c.signatureData.startsWith('data:image/')){
+    img.src=c.signatureData; img.style.display='block'; noImg.style.display='none';
+  } else {img.style.display='none'; noImg.style.display='block';}
+  document.getElementById('sig-viewer').classList.remove('hidden');
+}
+document.getElementById('sig-viewer').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.add('hidden');});
+
+// ── Reviews ───────────────────────────────────────────────────
+async function loadAllReviews(){
+  if(isDemoMode){
+    document.getElementById('pending-reviews-list').innerHTML='<div class="empty-state">No pending reviews.</div>';
+    document.getElementById('approved-reviews-list').innerHTML='<div class="empty-state">No published reviews yet.</div>'; return;
+  }
+  try{const d=await adminApi({action:'getAllReviews'});if(d.success)renderAllReviews(d.reviews||[]);}
+  catch{renderAllReviews([]);}
+}
+
+function renderAllReviews(reviews){
+  const pending=reviews.filter(r=>r.status==='pending'), approved=reviews.filter(r=>r.status==='approved');
+  setText('pending-count',pending.length+' pending');
+  if(pending.length){setText('review-badge',pending.length);document.getElementById('review-badge').style.display='inline';}
+  document.getElementById('pending-reviews-list').innerHTML=pending.length?pending.map(r=>`
+    <div class="review-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div><div style="font-weight:600;color:var(--text)">${esc(r.clientName)}</div>
+          <div style="font-size:.8rem;color:var(--text-muted)">${esc(r.date)} · ${'★'.repeat(r.rating||5)}</div></div>
+        <span class="badge badge--warning">Pending</span>
+      </div>
+      <div style="font-weight:500;color:var(--text);margin-bottom:6px">${esc(r.title)}</div>
+      <p style="font-size:.875rem">${esc(r.body)}</p>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn--success btn--sm" onclick="approveReview('${esc(r.id)}',this)">Approve &amp; Publish</button>
+        <button class="btn btn--danger btn--sm" onclick="rejectReview('${esc(r.id)}',this)">Reject</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">No pending reviews.</div>';
+  document.getElementById('approved-reviews-list').innerHTML=approved.length?approved.map(r=>`
+    <div class="review-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div><div style="font-weight:600;color:var(--text)">${esc(r.clientName)}</div>
+          <div style="font-size:.8rem;color:var(--text-muted)">${esc(r.date)} · ${'★'.repeat(r.rating||5)}</div></div>
+        <span class="badge badge--success">Published</span>
+      </div>
+      <div style="font-weight:500;color:var(--text);margin-bottom:6px">${esc(r.title)}</div>
+      <p style="font-size:.875rem">${esc(r.body)}</p>
+    </div>`).join(''):'<div class="empty-state">No published reviews yet.</div>';
+}
+
+async function approveReview(id,btn){
+  if(isDemoMode){aToast('Demo mode.','info');return;}
+  btn.textContent='...'; btn.disabled=true;
+  try{const d=await adminApi({action:'approveReview',reviewId:id});
+    if(d.success){aToast('Review published.','success');loadAllReviews();}
+    else{aToast(d.message||'Failed.','error');btn.textContent='Approve & Publish';btn.disabled=false;}}
+  catch{aToast('Error.','error');btn.textContent='Approve & Publish';btn.disabled=false;}
+}
+async function rejectReview(id,btn){
+  if(!confirm('Permanently delete this review?')) return;
+  if(isDemoMode){aToast('Demo mode.','info');return;}
+  btn.textContent='...'; btn.disabled=true;
+  try{const d=await adminApi({action:'rejectReview',reviewId:id});
+    if(d.success){aToast('Review rejected.','success');loadAllReviews();}
+    else{aToast(d.message||'Failed.','error');btn.textContent='Reject';btn.disabled=false;}}
+  catch{aToast('Error.','error');btn.textContent='Reject';btn.disabled=false;}
+}
+
+// ── Referrals ─────────────────────────────────────────────────
+async function loadAllReferrals(){
+  if(isDemoMode){
+    ['ref-count','ref-converted','ref-rewards','ref-rate'].forEach(id=>setText(id,'—'));
+    document.getElementById('referrals-tbody').innerHTML='<tr><td colspan="6" class="empty-state">No referrals yet.</td></tr>'; return;
+  }
+  try{const d=await adminApi({action:'getAllReferrals'});if(d.success)renderAllReferrals(d.referrals||[]);}
+  catch{renderAllReferrals([]);}
+}
+
+function renderAllReferrals(refs){
+  const conv=refs.filter(r=>r.status==='converted');
+  setText('ref-count',refs.length); setText('ref-converted',conv.length);
+  setText('ref-rewards','$'+(conv.length*25)); setText('ref-rate',refs.length?Math.round(conv.length/refs.length*100)+'%':'—');
+  document.getElementById('referrals-tbody').innerHTML=refs.length?refs.map(r=>`
+    <tr>
+      <td style="color:var(--text)">${esc(r.referrerName||'—')}</td>
+      <td>${esc(r.business||'—')}</td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(r.date||'—')}</td>
+      <td><span class="badge badge--${r.status==='converted'?'success':'warning'}">${esc(ucfirst(r.status||'pending'))}</span></td>
+      <td style="color:var(--gold);font-weight:500">${r.status==='converted'?'$25 credited':'Pending'}</td>
+      <td>${r.status!=='converted'?`<button class="btn btn--success btn--sm" onclick="convertRef('${esc(r.id)}',this)">Mark Converted</button>`:'<span style="color:var(--success);font-size:.8rem">Done</span>'}</td>
+    </tr>`).join(''):'<tr><td colspan="6" class="empty-state">No referrals yet.</td></tr>';
+}
+
+async function convertRef(id,btn){
+  if(isDemoMode){aToast('Demo mode.','info');return;}
+  btn.textContent='...'; btn.disabled=true;
+  try{
+    const d=await adminApi({action:'convertReferral',referralId:id});
+    if(d.success){aToast('Referral converted — $25 credit added to client account.','success');loadAllReferrals();loadClients();}
+    else{aToast(d.message||'Failed.','error');btn.textContent='Mark Converted';btn.disabled=false;}
+  }catch{aToast('Error.','error');btn.textContent='Mark Converted';btn.disabled=false;}
+}
+
+// ── Mailing List ──────────────────────────────────────────────
+async function loadMailingList(){
+  if(isDemoMode){setText('mail-total','0');setText('mail-month','0');
+    document.getElementById('mailing-tbody').innerHTML='<tr><td colspan="4" class="empty-state">No subscribers yet.</td></tr>'; return;}
+  try{const d=await adminApi({action:'getMailingList'});if(d.success)renderMailingList(d.subscribers||[]);}
+  catch{renderMailingList([]);}
+}
+
+function renderMailingList(subs){
+  const now=new Date();
+  const thisMonth=subs.filter(s=>{try{const d=new Date(s.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}catch{return false;}});
+  setText('mail-total',subs.length); setText('mail-month',thisMonth.length);
+  document.getElementById('mailing-tbody').innerHTML=subs.length?subs.map(s=>`
+    <tr>
+      <td style="color:var(--text)">${esc(s.email)}</td>
+      <td style="color:var(--text-muted)">${esc(s.date||'—')}</td>
+      <td><span class="badge badge--gold">${esc(s.source||'Website')}</span></td>
+      <td><button class="btn btn--ghost btn--sm" onclick="removeSub('${esc(s.email)}',this)">Remove</button></td>
+    </tr>`).join(''):'<tr><td colspan="4" class="empty-state">No subscribers yet.</td></tr>';
+}
+
+async function removeSub(email,btn){
+  if(!confirm('Remove '+email+'?')) return;
+  if(isDemoMode){aToast('Demo mode.','info');return;}
+  btn.textContent='...'; btn.disabled=true;
+  try{const d=await adminApi({action:'unsubscribe',email});
+    if(d.success){aToast('Subscriber removed.','success');loadMailingList();}
+    else{aToast(d.message||'Failed.','error');btn.textContent='Remove';btn.disabled=false;}}
+  catch{aToast('Error.','error');btn.textContent='Remove';btn.disabled=false;}
+}
+
+// ── Email Composer — Rich Text Editor ─────────────────────────
+const rte = document.getElementById('email-rte');
+
+// Placeholder behaviour
+rte.addEventListener('focus',()=>{ if(rte.innerHTML==='') rte.style.color='var(--text)'; });
+rte.addEventListener('blur',()=>{ if(!rte.textContent.trim()) rte.innerHTML=''; });
+
+// Toolbar commands
+document.querySelectorAll('.rte-btn[data-cmd]').forEach(btn=>{
+  btn.addEventListener('mousedown', e=>{
+    e.preventDefault(); // prevent blur
+    const cmd=btn.dataset.cmd;
+    rte.focus();
+    switch(cmd){
+      case 'bold':       document.execCommand('bold');       break;
+      case 'italic':     document.execCommand('italic');     break;
+      case 'underline':  document.execCommand('underline');  break;
+      case 'h2':         document.execCommand('formatBlock',false,'h2'); break;
+      case 'h3':         document.execCommand('formatBlock',false,'h3'); break;
+      case 'p':          document.execCommand('formatBlock',false,'p');  break;
+      case 'ul':         document.execCommand('insertUnorderedList');    break;
+      case 'ol':         document.execCommand('insertOrderedList');      break;
+      case 'blockquote': document.execCommand('formatBlock',false,'blockquote'); break;
+      case 'hr': {
+        document.execCommand('insertHTML',false,'<hr style="border:none;border-top:1px solid #E5E7EB;margin:16px 0">');
+        break;
+      }
+      case 'link': {
+        const url=prompt('Enter URL:','https://');
+        if(url&&url!=='https://') document.execCommand('createLink',false,url);
+        break;
+      }
+      case 'clear':
+        if(confirm('Clear all formatting and content?')){ rte.innerHTML=''; }
+        break;
+    }
+  });
+});
+
+// Template loader
+const EMAIL_TEMPLATES = {
+  welcome: {
+    subject:'Welcome to CWO Strategy Group — Your Portal Is Ready',
+    body:`<h2>Welcome Aboard</h2>
+<p>We are excited to have you as a client of CWO Strategy Group. Your client portal is now active and ready to use.</p>
+<p>Through your portal you can:</p>
+<ul>
+<li>Track your project status in real time</li>
+<li>Send and receive messages with your team</li>
+<li>Upload and download project files</li>
+<li>View and pay invoices</li>
+<li>Sign your service agreement</li>
+</ul>
+<p>If you have any questions as we get started, do not hesitate to reach out through the portal messaging system or by replying to this email.</p>`,
+    cta:'Log In to Your Portal', ctaUrl:'/client-portal.html',
+  },
+  update: {
+    subject:'Your Project Is Moving Forward',
+    body:`<h2>Project Update</h2>
+<p>We have an update to share on your project. Things are progressing well and we wanted to keep you informed.</p>
+<p>[Add specific update details here before sending]</p>
+<p>Please log in to your portal to view the latest project status and milestones.</p>`,
+    cta:'View Project Status', ctaUrl:'/client-portal.html',
+  },
+  invoice_reminder: {
+    subject:'Invoice Reminder — CWO Strategy Group',
+    body:`<h2>Invoice Reminder</h2>
+<p>This is a friendly reminder that you have an outstanding invoice with CWO Strategy Group.</p>
+<p>You can view your invoice details and complete payment securely through your client portal.</p>
+<p>If you have any questions about your invoice, please reply to this email and we will be happy to help.</p>`,
+    cta:'View & Pay Invoice', ctaUrl:'/client-portal.html',
+  },
+  follow_up: {
+    subject:'Checking In — CWO Strategy Group',
+    body:`<h2>Just Checking In</h2>
+<p>We wanted to check in and see how things are going from your end.</p>
+<p>If you have any questions, content ready to share, or feedback to pass along, please send it through your portal or reply directly to this email.</p>
+<p>We are committed to keeping your project on track and look forward to hearing from you.</p>`,
+    cta:'Message Us', ctaUrl:'/client-portal.html',
+  },
+  seo_report: {
+    subject:'Your Monthly SEO Report — CWO Strategy Group',
+    body:`<h2>Monthly SEO Report</h2>
+<p>Your monthly SEO summary is ready. Here is a quick overview of this month's activity:</p>
+<ul>
+<li><strong>Keywords Updated:</strong> [number]</li>
+<li><strong>Pages Optimised:</strong> [number]</li>
+<li><strong>Top Ranking Keyword:</strong> [keyword]</li>
+</ul>
+<p>[Add specific insights and recommendations here]</p>
+<p>Full details and recommendations are available in your client portal. As always, feel free to reach out with any questions.</p>`,
+    cta:'View Your Portal', ctaUrl:'/client-portal.html',
+  },
+};
+
+document.getElementById('email-template').addEventListener('change',function(){
+  const t=EMAIL_TEMPLATES[this.value];
+  if(!t) return;
+  document.getElementById('email-subject').value=t.subject||'';
+  rte.innerHTML=t.body||'';
+  document.getElementById('email-cta').value=t.cta||'';
+  document.getElementById('email-cta-url').value=t.ctaUrl||'';
+  this.value='';
+  renderPreview();
+});
+
+document.getElementById('email-to-select').addEventListener('change',function(){
+  if(!this.value) return;
+  const cur=document.getElementById('email-to').value.trim();
+  document.getElementById('email-to').value=cur?cur+', '+this.value:this.value;
+  this.value='';
+});
+
+function populateEmailClientSelect(clients){
+  const sel=document.getElementById('email-to-select');
+  if(!sel) return;
+  sel.innerHTML='<option value="">Add client...</option>'+clients.map(c=>`<option value="${esc(c.email)}">${esc(c.name)}</option>`).join('');
+}
+
+// Render preview
+function buildEmailPreviewHtml(body,cta,ctaUrl){
+  const ctaBlock=cta&&ctaUrl?`<tr><td align="center" style="padding:24px 0 8px">
+    <a href="${ctaUrl}" style="background:#C9A84C;color:#070B17;text-decoration:none;
+      font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+      padding:14px 32px;border-radius:4px;display:inline-block;font-family:Arial,sans-serif">
+      ${cta}</a></td></tr>`:'';
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+  body{margin:0;padding:0;background:#F2F4F8;font-family:Arial,sans-serif}
+  h2{font-family:Georgia,serif;font-size:20px;color:#0D1526;margin:0 0 14px;font-weight:600}
+  h3{font-family:Arial,sans-serif;font-size:15px;color:#0D1526;margin:0 0 10px;font-weight:600}
+  p{font-family:Arial,sans-serif;font-size:15px;color:#374151;line-height:1.75;margin:0 0 14px}
+  ul,ol{font-family:Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 14px;padding-left:20px}
+  li{margin-bottom:4px;line-height:1.7}
+  blockquote{border-left:3px solid #C9A84C;margin:0 0 14px;padding:10px 16px;
+    background:#F9F3E7;color:#6B7280;font-style:italic}
+  strong{font-weight:700;color:#0D1526}
+  a{color:#C9A84C;text-decoration:underline}
+  hr{border:none;border-top:1px solid #E5E7EB;margin:16px 0}
+</style>
+</head>
+<body>
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10)">
+<tr><td style="background:#070B17;padding:28px 36px;text-align:center">
+  <p style="margin:0;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#fff">CWO Strategy Group</p>
+  <p style="margin:5px 0 0;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#C9A84C">Digital Growth Agency</p>
+  <table cellpadding="0" cellspacing="0" style="margin:14px auto 0"><tr><td style="background:#C9A84C;height:2px;width:50px;border-radius:2px"></td></tr></table>
+</td></tr>
+<tr><td style="padding:32px 36px">
+  <div>${body}</div>
+  <table width="100%" cellpadding="0" cellspacing="0">${ctaBlock}</table>
+</td></tr>
+<tr><td style="background:#0D1526;padding:22px 36px">
+  <p style="margin:0;font-size:12px;color:#8A9BBF;font-family:Arial,sans-serif">
+    <strong style="color:#C9A84C">CWO Strategy Group</strong>
+    &nbsp;&middot;&nbsp; caelmoloney@gmail.com
+  </p>
+</td></tr>
+</table></td></tr></table>
+</body></html>`;
+}
+
+function renderPreview(){
+  const body=rte.innerHTML.trim();
+  const cta=document.getElementById('email-cta').value.trim();
+  const ctaUrl=document.getElementById('email-cta-url').value.trim();
+  const frame=document.getElementById('email-preview-frame');
+  frame.srcdoc=buildEmailPreviewHtml(body||'<p style="color:#8A9BBF;text-align:center;padding:20px">Add content in the editor to preview it here.</p>',cta,ctaUrl);
+  document.getElementById('preview-status').textContent='Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+document.getElementById('render-email-btn').addEventListener('click',renderPreview);
+
+// Auto-render on content change (debounced)
+let previewTimer;
+rte.addEventListener('input',()=>{ clearTimeout(previewTimer); previewTimer=setTimeout(renderPreview,800); });
+['email-cta','email-cta-url'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{ clearTimeout(previewTimer); previewTimer=setTimeout(renderPreview,400); }));
+
+// Send email
+document.getElementById('compose-form').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const to=document.getElementById('email-to').value.trim();
+  const subject=document.getElementById('email-subject').value.trim();
+  const bodyHtml=rte.innerHTML.trim();
+  const cta=document.getElementById('email-cta').value.trim();
+  const ctaUrl=document.getElementById('email-cta-url').value.trim();
+  const errEl=document.getElementById('compose-error'), succEl=document.getElementById('compose-success');
+  errEl.style.display='none'; succEl.style.display='none';
+  if(!to){errEl.textContent='Please enter at least one recipient.';errEl.style.display='block';return;}
+  if(!subject){errEl.textContent='Please enter a subject.';errEl.style.display='block';return;}
+  if(!bodyHtml||bodyHtml==='<br>'||bodyHtml===''){errEl.textContent='Please write a message body.';errEl.style.display='block';return;}
+  if(isDemoMode){succEl.textContent='Demo mode — email not sent, but preview looks correct.';succEl.style.display='block';return;}
+  const btn=document.getElementById('send-email-btn'); btn.disabled=true;
+  btn.innerHTML='<span class="spinner" style="width:16px;height:16px;display:inline-block"></span> Sending...';
+  try{
+    const d=await adminApi({action:'sendAdminEmail',to,subject,bodyHtml,ctaLabel:cta,ctaUrl});
+    if(d.success){
+      succEl.textContent='Email sent to '+d.sent+' recipient'+(d.sent>1?'s':'')+'.';
+      succEl.style.display='block';
+      document.getElementById('email-to').value='';
+      document.getElementById('email-subject').value='';
+      rte.innerHTML='';
+      document.getElementById('email-cta').value='';
+      document.getElementById('email-cta-url').value='';
+      renderPreview();
+    } else {errEl.textContent=d.message||'Send failed.';errEl.style.display='block';}
+  }catch{errEl.textContent='Connection error. Please try again.';errEl.style.display='block';}
+  btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Email';
+  btn.disabled=false;
+});
+
+// ── Quick +$25 Credit ─────────────────────────────────────────
+async function quickAddCredit(clientId, clientName, btn) {
+  if(!confirm('Add $25 referral credit to '+clientName+'?')) return;
+  if(isDemoMode){aToast('Demo mode — not saved.','info');return;}
+  btn.textContent='...'; btn.disabled=true;
+  try {
+    const d=await adminApi({action:'adjustCredit',clientId,amount:25,note:'Quick credit added by admin'});
+    if(d.success){
+      aToast('$25 credit added to '+clientName+' (new balance: $'+d.newCredit+').','success');
+      const idx=allClients.findIndex(c=>c.id===clientId);
+      if(idx>-1){allClients[idx].referralCredit=parseFloat(d.newCredit)||0;renderClients(allClients);}
+    } else {
+      aToast(d.message||'Failed to add credit.','error');
+    }
+  } catch{ aToast('Connection error.','error'); }
+  btn.textContent='+$25'; btn.disabled=false;
+}
+
+// ── Credit Management ─────────────────────────────────────────
+document.getElementById('apply-credit-btn').addEventListener('click', async ()=>{
+  const amount = parseFloat(document.getElementById('credit-amount').value);
+  const note   = document.getElementById('credit-note').value.trim();
+  const msgEl  = document.getElementById('credit-msg');
+  msgEl.style.display='none';
+
+  if (isNaN(amount) || amount === 0) {
+    msgEl.textContent='Please enter a non-zero amount.';
+    msgEl.style.background='rgba(231,76,60,.08)'; msgEl.style.color='var(--error)';
+    msgEl.style.display='block'; return;
+  }
+  if (!editingClientId) { aToast('No client selected.','error'); return; }
+  if (isDemoMode) { aToast('Demo mode — not saved.','info'); return; }
+
+  const btn=document.getElementById('apply-credit-btn');
+  btn.textContent='Applying...'; btn.disabled=true;
+
+  try {
+    const d=await adminApi({action:'adjustCredit',clientId:editingClientId,amount,note});
+    if(d.success){
+      const sign = amount>0?'+':'';
+      msgEl.textContent=`Credit adjusted: ${sign}$${Math.abs(amount).toFixed(2)}. New balance: $${d.newCredit}`;
+      msgEl.style.background='rgba(46,204,113,.08)'; msgEl.style.color='var(--success)';
+      msgEl.style.display='block';
+      // Update display and local cache
+      const creditDisplay=document.getElementById('credit-current-display');
+      if(creditDisplay) creditDisplay.textContent='$'+d.newCredit;
+      const creditVouchers=document.getElementById('credit-num-vouchers');
+      if(creditVouchers){
+        const newBal=parseFloat(d.newCredit)||0;
+        const n=Math.floor(newBal/25);
+        creditVouchers.textContent=n>0
+          ?n+' voucher'+(n>1?'s':'')+' ($25 each) + $'+(newBal%25).toFixed(2)+' partial'
+          :newBal>0?'Partial credit (less than one $25 voucher)':'No credit balance';
+      }
+      const idx=allClients.findIndex(c=>c.id===editingClientId);
+      if(idx>-1){ allClients[idx].referralCredit=parseFloat(d.newCredit)||0; renderClients(allClients); }
+      document.getElementById('credit-amount').value='';
+      document.getElementById('credit-note').value='';
+    } else {
+      msgEl.textContent=d.message||'Adjustment failed.';
+      msgEl.style.background='rgba(231,76,60,.08)'; msgEl.style.color='var(--error)';
+      msgEl.style.display='block';
+    }
+  } catch{ msgEl.textContent='Connection error.'; msgEl.style.background='rgba(231,76,60,.08)'; msgEl.style.color='var(--error)'; msgEl.style.display='block'; }
+  btn.textContent='Apply Credit Adjustment'; btn.disabled=false;
+});
+
+// ── Consultations ─────────────────────────────────────────────
+let allConsultations = [];
+
+async function loadConsultations(){
+  if(isDemoMode){
+    allConsultations=[];
+    document.getElementById('consultations-tbody').innerHTML='<tr><td colspan="7" class="empty-state">No consultations (demo mode).</td></tr>';
+    setText('con-total','0'); setText('con-month','0'); setText('con-refs','0'); return;
+  }
+  try{
+    const d=await adminApi({action:'getConsultations'});
+    if(d.success){ allConsultations=d.consultations||[]; renderConsultations(allConsultations); }
+    else aToast('Could not load consultations: '+d.message,'error');
+  }catch(err){ if(err.message!=='DEMO_MODE') aToast('Could not load consultations.','error'); }
+}
+
+function renderConsultations(list){
+  const now=new Date(), thisMonth=list.filter(c=>{
+    const d=new Date(c.submittedAt||''); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  });
+  const withCode=list.filter(c=>c.referralCode);
+  setText('con-total',list.length);
+  setText('con-month',thisMonth.length);
+  setText('con-refs',withCode.length);
+  if(list.length>0){
+    const badge=document.getElementById('consult-badge');
+    if(badge){badge.textContent=list.length;badge.style.display='inline';}
+  }
+  document.getElementById('consultations-tbody').innerHTML=list.length?list.map(c=>`
+    <tr>
+      <td style="color:var(--text);font-weight:500">${esc(c.name)}</td>
+      <td>${esc(c.business||'—')}</td>
+      <td style="color:var(--text-muted);font-size:.85rem">${esc(c.email)}</td>
+      <td>${esc(c.service||'—')}</td>
+      <td style="color:var(--text-muted)">${esc(c.budget||'—')}</td>
+      <td style="color:var(--text-muted);font-size:.8rem">${esc(c.submittedAt||'—')}</td>
+      <td><button class="btn btn--ghost btn--sm" onclick="showConsultDetail('${esc(c.id)}')">View</button></td>
+    </tr>`).join(''):'<tr><td colspan="7" class="empty-state">No consultation requests yet.</td></tr>';
+}
+
+function showConsultDetail(id){
+  const c=allConsultations.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('consult-detail-title').textContent=c.name+' — '+c.business;
+  document.getElementById('consult-detail-body').innerHTML=`
+    <div class="grid-2" style="gap:16px;margin-bottom:16px">
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Name</div><div style="color:var(--text)">${esc(c.name)}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Email</div><a href="mailto:${esc(c.email)}" style="color:var(--gold)">${esc(c.email)}</a></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Phone</div><div style="color:var(--text)">${esc(c.phone||'—')}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Business</div><div style="color:var(--text)">${esc(c.business)}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Website</div><div style="color:var(--text)">${c.website?`<a href="${esc(c.website)}" target="_blank" rel="noopener" style="color:var(--gold)">${esc(c.website)}</a>`:'—'}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Service Interest</div><div style="color:var(--text)">${esc(c.service||'—')}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Budget</div><div style="color:var(--text)">${esc(c.budget||'—')}</div></div>
+      <div><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:3px">Referral Code</div><div style="color:var(--gold);font-weight:600">${esc(c.referralCode||'None')}</div></div>
+    </div>
+    <div style="padding:16px;background:var(--bg-surface);border-radius:var(--radius);font-size:.875rem;color:var(--text-secondary);line-height:1.7">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px">Message</div>
+      ${esc(c.message||'—')}
+    </div>
+    <div style="margin-top:12px;font-size:.8rem;color:var(--text-muted)">Submitted: ${esc(c.submittedAt||'—')}</div>`;
+  document.getElementById('consult-detail').style.display='block';
+  // Pre-fill "Create Client" button with data
+  document.getElementById('consult-create-client-btn').onclick=()=>{
+    document.getElementById('cc-name').value=c.name;
+    document.getElementById('cc-email').value=c.email;
+    document.getElementById('cc-business').value=c.business||'';
+    document.getElementById('cc-phone').value=c.phone||'';
+    document.getElementById('consult-detail').style.display='none';
+    showAdminSection('create-client');
+  };
+  document.getElementById('consult-email-btn').onclick=()=>{
+    document.getElementById('email-to').value=c.email;
+    document.getElementById('email-subject').value='Following up on your consultation request — CWO Strategy Group';
+    showAdminSection('email');
+  };
+  document.getElementById('consult-detail').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+document.getElementById('export-consultations-btn').addEventListener('click',()=>{
+  exportCSV(allConsultations,'cwo-consultations',['name','email','phone','business','website','service','budget','referralCode','submittedAt']);
+});
+
+// ── CSV Export ────────────────────────────────────────────────
+function exportCSV(data, filename, fields){
+  if(!data.length){aToast('No data to export.','info');return;}
+  const headers=fields||Object.keys(data[0]);
+  const rows=[headers.join(','),...data.map(row=>headers.map(h=>{
+    const val=String(row[h]||'').replace(/"/g,'""');
+    return /[,\n"]/.test(val)?`"${val}"`:val;
+  }).join(','))];
+  const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename+'-'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  aToast('CSV exported: '+filename,'success');
+}
+
+// ── Utilities ─────────────────────────────────────────────────
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function ucfirst(s){return String(s||'').charAt(0).toUpperCase()+String(s||'').slice(1);}
+</script>
+</body>
+</html>
