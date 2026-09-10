@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090c">
+
+<title>Client Dashboard | CWO Strategy Group</title>
+<meta name="description" content="CWO Strategy Group client dashboard — website analytics, keyword rankings, site health, and change requests.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="nav is-stuck" data-nav>
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="CWO Strategy Group — home">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><defs><linearGradient id="bmD" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3ddc97"/><stop offset="100%" stop-color="#4d8dff"/></linearGradient></defs><path d="M42 20a15 15 0 1 0 0 24" fill="none" stroke="url(#bmD)" stroke-width="7" stroke-linecap="round"/><rect x="44" y="38" width="7" height="7" rx="1.5" fill="#3ddc97"/></svg>
+      </span>
+      <span class="brand__txt">CWO Strategy Group</span>
+    </a>
+    <button class="nav__toggle" data-nav-toggle aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
+      <span class="nav__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav__panel" id="navPanel" data-nav-panel aria-label="Portal">
+      <ul class="nav__links">
+        <li><a href="#overview" aria-current="page">Overview</a></li>
+        <li><a href="#traffic">Traffic</a></li>
+        <li><a href="#keywords">Keywords</a></li>
+        <li><a href="#health">Site health</a></li>
+        <li><a href="#requests">Requests</a></li>
+        <li><a href="index.html">Main site</a></li>
+        <li><a class="btn btn--ghost btn--sm" href="login.html" data-logout>Sign out</a></li>
+      </ul>
+      <div class="nav__meta">
+        <a href="mailto:cwostrategygroup@gmail.com">cwostrategygroup@gmail.com</a>
+        <a href="index.html">Main site</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<div class="nav__scrim" data-nav-scrim aria-hidden="true"></div>
+
+<main id="main" class="portal">
+<div class="wrap">
+
+  <div class="portal__head" id="overview">
+    <div>
+      <p class="eyebrow" style="margin-bottom:.5rem">Client dashboard</p>
+      <h1>Welcome back, <span data-user-name>M &amp; S Bakery (DEMO: Not Real Statistics)</span>.</h1>
+    </div>
+    <div style="text-align:right">
+      <p class="portal__who" style="margin:0">
+        <span data-user-email>owner@msbakery.com</span><br>
+        Property: <span data-property>msbakery.com</span>
+      </p>
+      <div class="btn-row" style="margin-top:.7rem;justify-content:flex-end">
+        <a class="btn btn--ghost btn--sm" href="#requests">New request</a>
+        <a class="btn btn--ghost btn--sm" href="login.html" data-logout>Sign out</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert--ok is-shown" data-demo-banner style="margin-bottom:2rem">
+    <strong>Demo data.</strong> This is a design preview. Once
+    <code>/api/portal/summary</code> is live, real figures load in place of these.
+  </div>
+
+  <!-- ------------------------------ KPIs ------------------------------ -->
+  <section aria-labelledby="kpiH" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
+    <h2 id="kpiH" class="updated" style="margin-bottom:1rem">Last 30 days</h2>
+    <div class="kpis">
+      <div class="kpi reveal">
+        <div class="kpi__k">Visitors</div>
+        <div class="kpi__v"><span data-count="4820">0</span></div>
+        <div class="kpi__d up">&uarr; 18.4% vs. prior 30 days</div>
+      </div>
+      <div class="kpi reveal" style="--d:1">
+        <div class="kpi__k">Organic sessions</div>
+        <div class="kpi__v"><span data-count="3117">0</span></div>
+        <div class="kpi__d up">&uarr; 26.1%</div>
+      </div>
+      <div class="kpi reveal" style="--d:2">
+        <div class="kpi__k">Calls &amp; form leads</div>
+        <div class="kpi__v"><span data-count="64">0</span></div>
+        <div class="kpi__d up">&uarr; 9 vs. prior period</div>
+      </div>
+      <div class="kpi reveal" style="--d:3">
+        <div class="kpi__k">Avg. load time</div>
+        <div class="kpi__v"><span data-count="0.9" data-suffix="s">0</span></div>
+        <div class="kpi__d up">&darr; 0.3s faster</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------- TRAFFIC ---------------------------- -->
+  <section aria-labelledby="trafficH" id="traffic" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
+    <h2 id="trafficH" class="updated" style="margin-bottom:1rem">Traffic trend</h2>
+    <div class="chart reveal">
+      <svg viewBox="0 0 800 240" preserveAspectRatio="none" role="img"
+           aria-label="Sessions over the last 12 weeks, trending upward from about 210 to about 690 per week.">
+        <defs>
+          <linearGradient id="cwoFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3ddc97" stop-opacity=".22"/>
+            <stop offset="100%" stop-color="#3ddc97" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <line class="chart__grid" x1="0" y1="40" x2="800" y2="40"/>
+        <line class="chart__grid" x1="0" y1="100" x2="800" y2="100"/>
+        <line class="chart__grid" x1="0" y1="160" x2="800" y2="160"/>
+        <line class="chart__grid" x1="0" y1="220" x2="800" y2="220"/>
+        <path class="chart__area" d="M0,196 L72,188 L145,201 L218,170 L291,158 L364,166 L437,132 L510,118 L582,96 L655,84 L727,62 L800,44 L800,240 L0,240 Z"/>
+        <path class="chart__line" data-draw d="M0,196 L72,188 L145,201 L218,170 L291,158 L364,166 L437,132 L510,118 L582,96 L655,84 L727,62 L800,44"/>
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.66rem;color:var(--text-faint);margin-top:.9rem">
+        <span>12 wks ago</span><span>6 wks ago</span><span>This week</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------- TOP PAGES + SOURCES ------------------------ -->
+  <section class="grid grid--2" style="margin-bottom:clamp(2rem,5vh,3.5rem)" aria-label="Traffic detail">
+    <div class="chart reveal">
+      <h3 style="font-size:1.02rem">Top pages</h3>
+      <div class="table-scroll">
+        <table class="tbl">
+          <thead><tr><th scope="col">Page</th><th scope="col">Views</th><th scope="col">Avg. time</th></tr></thead>
+          <tbody>
+            <tr><td>/</td><td>2,041</td><td>1m 12s</td></tr>
+            <tr><td>/menu</td><td>1,388</td><td>2m 04s</td></tr>
+            <tr><td>/order</td><td>702</td><td>1m 47s</td></tr>
+            <tr><td>/hours-location</td><td>498</td><td>0m 51s</td></tr>
+            <tr><td>/catering</td><td>191</td><td>1m 33s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart reveal" style="--d:1">
+      <h3 style="font-size:1.02rem">Where visitors come from</h3>
+      <div class="table-scroll">
+        <table class="tbl">
+          <thead><tr><th scope="col">Source</th><th scope="col">Sessions</th><th scope="col">Share</th></tr></thead>
+          <tbody>
+            <tr><td>Google organic</td><td>3,117</td><td>64.7%</td></tr>
+            <tr><td>Google Maps</td><td>812</td><td>16.8%</td></tr>
+            <tr><td>Direct</td><td>544</td><td>11.3%</td></tr>
+            <tr><td>Instagram</td><td>241</td><td>5.0%</td></tr>
+            <tr><td>AI assistants</td><td>106</td><td>2.2%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------- KEYWORDS ---------------------------- -->
+  <section aria-labelledby="kwH" id="keywords" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
+    <h2 id="kwH" class="updated" style="margin-bottom:1rem">Keyword positions</h2>
+    <div class="chart reveal">
+      <div class="table-scroll">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th scope="col">Keyword</th>
+              <th scope="col">Position</th>
+              <th scope="col">Change</th>
+              <th scope="col">Monthly volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>bakery columbus ohio</td><td>3</td><td>&uarr; 4</td><td>2,400</td></tr>
+            <tr><td>fresh bread near me</td><td>5</td><td>&uarr; 2</td><td>1,900</td></tr>
+            <tr><td>custom cakes columbus</td><td>7</td><td>&uarr; 6</td><td>880</td></tr>
+            <tr><td>catering bakery ohio</td><td>11</td><td>&uarr; 1</td><td>590</td></tr>
+            <tr><td>gluten free bakery columbus</td><td>14</td><td>&mdash;</td><td>420</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------------- SITE HEALTH -------------------------- -->
+  <section aria-labelledby="healthH" id="health" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
+    <h2 id="healthH" class="updated" style="margin-bottom:1rem">Site health</h2>
+    <div class="grid grid--4">
+      <div class="kpi reveal">
+        <div class="kpi__k">Uptime (30d)</div>
+        <div class="kpi__v"><span data-count="99.98" data-suffix="%">0</span></div>
+        <div class="kpi__d up">No incidents</div>
+      </div>
+      <div class="kpi reveal" style="--d:1">
+        <div class="kpi__k">Largest Contentful Paint</div>
+        <div class="kpi__v"><span data-count="1.1" data-suffix="s">0</span></div>
+        <div class="kpi__d up">Good &mdash; under 2.5s</div>
+      </div>
+      <div class="kpi reveal" style="--d:2">
+        <div class="kpi__k">Cumulative Layout Shift</div>
+        <div class="kpi__v"><span data-count="0.01">0</span></div>
+        <div class="kpi__d up">Good &mdash; under 0.1</div>
+      </div>
+      <div class="kpi reveal" style="--d:3">
+        <div class="kpi__k">Broken links</div>
+        <div class="kpi__v"><span data-count="0">0</span></div>
+        <div class="kpi__d up">Last crawled today</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------- REQUESTS ---------------------------- -->
+  <section aria-labelledby="reqH" id="requests">
+    <h2 id="reqH" class="updated" style="margin-bottom:1rem">Change requests</h2>
+
+    <div class="grid grid--2" style="align-items:start">
+
+      <div class="chart reveal">
+        <h3 style="font-size:1.02rem">Open and recent</h3>
+        <div class="table-scroll">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th scope="col">Ref</th><th scope="col">Summary</th>
+                <th scope="col">Submitted</th><th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>#1042</td><td>Update holiday hours</td><td>2 days ago</td><td><span class="tag tag--prog">In progress</span></td></tr>
+              <tr><td>#1039</td><td>Add three menu photos</td><td>6 days ago</td><td><span class="tag tag--done">Done</span></td></tr>
+              <tr><td>#1036</td><td>New catering page</td><td>2 weeks ago</td><td><span class="tag tag--done">Done</span></td></tr>
+              <tr><td>#1031</td><td>Fix contact form spam</td><td>3 weeks ago</td><td><span class="tag tag--done">Done</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart reveal" style="--d:1">
+        <h3 style="font-size:1.02rem">Submit a change</h3>
+
+        <!--
+          POST /api/portal/requests
+          The body carries NO account_id or property_id. The server derives
+          both from the session. That is what makes field tampering useless.
+        -->
+        <form class="form" data-validate method="post" action="#" novalidate
+              data-success="Request received. You'll get an email confirmation and it'll appear in the table within a minute.">
+          <input type="hidden" name="_csrf" value="SERVER_RENDERS_CSRF_TOKEN">
+
+          <div class="hp" aria-hidden="true">
+            <label for="company_url">Company URL</label>
+            <input id="company_url" name="company_url" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="alert alert--ok" role="status" data-alert-ok></div>
+          <div class="alert alert--bad" role="alert" data-alert-bad></div>
+
+          <div class="field">
+            <label for="req_type">Type <span class="req" aria-hidden="true">*</span></label>
+            <select class="input" id="req_type" name="request_type" required>
+              <option value="">Choose one…</option>
+              <option value="content">Content or copy change</option>
+              <option value="images">Add or replace images</option>
+              <option value="new-page">New page or section</option>
+              <option value="bug">Something is broken</option>
+              <option value="seo">SEO question</option>
+              <option value="other">Other</option>
+            </select>
+            <span class="err" aria-live="polite"></span>
+          </div>
+
+          <div class="field">
+            <label for="req_priority">Priority <span class="req" aria-hidden="true">*</span></label>
+            <select class="input" id="req_priority" name="priority" required>
+              <option value="">Choose one…</option>
+              <option value="low">Low — whenever</option>
+              <option value="normal">Normal — this week</option>
+              <option value="high">High — site is affected</option>
+              <option value="urgent">Urgent — site is down</option>
+            </select>
+            <span class="err" aria-live="polite"></span>
+          </div>
+
+          <div class="field">
+            <label for="req_details">Details <span class="req" aria-hidden="true">*</span></label>
+            <textarea class="input" id="req_details" name="details" required
+                      minlength="10" maxlength="2000"
+                      placeholder="Which page, and exactly what should change."></textarea>
+            <span class="err" aria-live="polite"></span>
+          </div>
+
+          <button class="btn btn--primary btn--wide" type="submit">
+            Submit request <span class="arrow">&rarr;</span>
+          </button>
+
+          <p class="form__note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            Urgent issues: email
+            <a href="mailto:cwostrategygroup@gmail.com" style="color:var(--term)">cwostrategygroup@gmail.com</a>
+            directly and we'll pick it up faster.
+          </p>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__bar" style="border-top:none">
+      <p>&copy; <span data-year>2026</span> CWO Strategy Group, LLC. All rights reserved.</p>
+      <ul class="foot__legal">
+        <li><a href="index.html">Main site</a></li>
+        <li><a href="privacy-policy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+        <li><a href="accessibility.html">Accessibility</a></li>
+      </ul>
+      <span class="foot__status"><span class="dot" aria-hidden="true"></span>Columbus, OH</span>
+    </div>
+  </div>
+</footer>
+
+<script src="scroll.js" defer></script>
+<script src="portal.js" defer></script>
+</body>
+</html>

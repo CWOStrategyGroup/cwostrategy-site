@@ -1,0 +1,72 @@
+# ============================================================
+# CWO Strategy Group — robots.txt
+# https://cwostrategy.com/
+#
+# robots.txt is a crawling hint, NOT access control. The portal
+# and API are protected server-side. These rules only keep them
+# out of search indexes.
+# ============================================================
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /portal.html
+Disallow: /login.html
+Disallow: /reset-password.html
+Disallow: /*?demo=
+
+# ---- AI / answer engines (AEO) ----
+# We want to be cited by these on public pages.
+
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /portal.html
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /api/
+
+User-agent: CCBot
+Allow: /
+Disallow: /api/
+
+# ---- SEO scrapers: throttled ----
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+# ---- Blocked ----
+User-agent: Bytespider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+Sitemap: https://cwostrategy.com/sitemap.xml

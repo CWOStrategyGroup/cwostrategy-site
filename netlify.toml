@@ -1,0 +1,207 @@
+#=============================================================================
+# CWO Strategy Group — netlify.toml
+# Security headers, HTTPS, caching, redirects, custom 404.
+# Apache and Nginx equivalents are in the comments at the bottom.
+#=============================================================================
+
+[build]
+  publish = "."
+  command = ""
+
+#-----------------------------------------------------------------------------
+# 1. CANONICAL HOST + LEGACY URL REDIRECTS
+#-----------------------------------------------------------------------------
+[[redirects]]
+  from = "https://www.cwostrategy.com/*"
+  to = "https://cwostrategy.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact"
+  to = "/start-a-project.html"
+  status = 301
+
+[[redirects]]
+  from = "/contact.html"
+  to = "/start-a-project.html"
+  status = 301
+
+[[redirects]]
+  from = "/services"
+  to = "/#services"
+  status = 301
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy-policy.html"
+  status = 301
+
+[[redirects]]
+  from = "/terms-of-service"
+  to = "/terms.html"
+  status = 301
+
+[[redirects]]
+  from = "/login"
+  to = "/login.html"
+  status = 301
+
+[[redirects]]
+  from = "/portal"
+  to = "/portal.html"
+  status = 301
+
+# Custom 404 — must be LAST.
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+#-----------------------------------------------------------------------------
+# 2. SECURITY HEADERS
+#    CSP is strict: no external script, style, or font origins are needed
+#    because the site ships zero third-party assets.
+#-----------------------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+    Permissions-Policy = "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), screen-wake-lock=(), usb=(), xr-spatial-tracking=(), interest-cohort=()"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; upgrade-insecure-requests"
+
+#-----------------------------------------------------------------------------
+# 3. AUTHENTICATED ROUTES — never cache, never index
+#-----------------------------------------------------------------------------
+[[headers]]
+  for = "/portal.html"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, private"
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/login.html"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, private"
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/reset-password.html"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate, private"
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+
+#-----------------------------------------------------------------------------
+# 4. CACHING
+#    HTML always revalidates so edits go live immediately.
+#    Assets cache for a week — bump a ?v= query when you change them.
+#-----------------------------------------------------------------------------
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/styles.css"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/scroll.js"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/portal.js"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/favicon.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+#=============================================================================
+# APACHE EQUIVALENT — save as .htaccess at the web root
+#=============================================================================
+#
+# RewriteEngine On
+# RewriteCond %{HTTPS} off [OR]
+# RewriteCond %{HTTP_HOST} ^www\. [NC]
+# RewriteCond %{HTTP_HOST} ^(?:www\.)?(.+)$ [NC]
+# RewriteRule ^ https://%1%{REQUEST_URI} [L,NE,R=301]
+#
+# ErrorDocument 404 /404.html
+#
+# <IfModule mod_headers.c>
+#   Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+#   Header always set X-Content-Type-Options "nosniff"
+#   Header always set X-Frame-Options "DENY"
+#   Header always set Referrer-Policy "strict-origin-when-cross-origin"
+#   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+#   Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; upgrade-insecure-requests"
+#   Header always unset X-Powered-By
+#   <FilesMatch "(portal|login|reset-password)\.html$">
+#     Header always set Cache-Control "no-store, no-cache, must-revalidate, private"
+#     Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+#   </FilesMatch>
+# </IfModule>
+#
+# <FilesMatch "^\.|\.(env|git|yml|ini|log|sql|bak)$">
+#   Require all denied
+# </FilesMatch>
+#
+# <IfModule mod_deflate.c>
+#   AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+#     application/javascript application/json image/svg+xml
+# </IfModule>
+#
+# <IfModule mod_expires.c>
+#   ExpiresActive On
+#   ExpiresByType text/css "access plus 7 days"
+#   ExpiresByType application/javascript "access plus 7 days"
+#   ExpiresByType image/svg+xml "access plus 30 days"
+#   ExpiresByType text/html "access plus 0 seconds"
+# </IfModule>
+
+#=============================================================================
+# NGINX EQUIVALENT
+#=============================================================================
+#
+# server {
+#   listen 443 ssl http2;
+#   server_name cwostrategy.com;
+#   root /var/www/cwostrategy;
+#   index index.html;
+#
+#   error_page 404 /404.html;
+#
+#   add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+#   add_header X-Content-Type-Options "nosniff" always;
+#   add_header X-Frame-Options "DENY" always;
+#   add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+#   add_header Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; upgrade-insecure-requests" always;
+#
+#   gzip on;
+#   gzip_types text/css application/javascript image/svg+xml application/json;
+#
+#   location ~* \.(css|js|svg)$ { expires 7d; }
+#   location ~* \.html$ { add_header Cache-Control "no-cache"; }
+# }
+#
+# server {
+#   listen 80;
+#   server_name cwostrategy.com www.cwostrategy.com;
+#   return 301 https://cwostrategy.com$request_uri;
+# }

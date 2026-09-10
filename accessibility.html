@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090c">
+
+<title>Accessibility Statement | CWO Strategy Group</title>
+<meta name="description" content="CWO Strategy Group's commitment to WCAG 2.1 AA accessibility: keyboard navigation, reduced motion, contrast standards, screen reader testing, and how to report a barrier.">
+<link rel="canonical" href="https://cwostrategy.com/accessibility.html">
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Accessibility Statement | CWO Strategy Group">
+<meta property="og:url" content="https://cwostrategy.com/accessibility.html">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+
+<header class="nav" data-nav>
+  <div class="wrap nav__inner">
+    <a class="brand" href="index.html" aria-label="CWO Strategy Group — home">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><defs><linearGradient id="bmX" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3ddc97"/><stop offset="100%" stop-color="#4d8dff"/></linearGradient></defs><path d="M42 20a15 15 0 1 0 0 24" fill="none" stroke="url(#bmX)" stroke-width="7" stroke-linecap="round"/><rect x="44" y="38" width="7" height="7" rx="1.5" fill="#3ddc97"/></svg>
+      </span>
+      <span class="brand__txt">Strategy Group</span>
+    </a>
+    <button class="nav__toggle" data-nav-toggle aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
+      <span class="nav__bars" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+    <nav class="nav__panel" id="navPanel" data-nav-panel aria-label="Primary">
+      <ul class="nav__links">
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="index.html#process">Process</a></li>
+        <li><a href="testimonials.html">Testimonials</a></li>
+        <li><a href="index.html#faq">FAQ</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="login.html">Client Login</a></li>
+        <li><a class="btn btn--primary btn--sm" href="start-a-project.html">Start a Project</a></li>
+      </ul>
+      <div class="nav__meta">
+        <a href="mailto:cwostrategygroup@gmail.com">cwostrategygroup@gmail.com</a>
+        <a href="index.html">Home</a>
+      </div>
+    </nav>
+  </div>
+</header>
+<div class="nav__scrim" data-nav-scrim aria-hidden="true"></div>
+
+<main id="main">
+
+<section class="section" style="padding-top:calc(var(--nav-h) + 5rem);position:relative;overflow:hidden">
+  <div class="glow glow--green" style="width:500px;height:500px;top:-20%;right:-14%" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow">Commitment</p>
+    <h1 data-split style="font-size:clamp(2rem,5vw,3.4rem);max-width:18ch">Accessibility Statement</h1>
+    <p class="lead">
+      A site nobody can use isn't finished. We build to WCAG 2.1 Level AA — on our
+      own site and on every client site we ship.
+    </p>
+    <p class="updated" style="margin-top:1.4rem">Last reviewed: August 28, 2026</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="prose reveal">
+
+      <h2>Conformance target</h2>
+      <p>
+        cwostrategy.com aims to conform to <strong>Web Content Accessibility
+        Guidelines (WCAG) 2.1, Level AA</strong>. We consider the site
+        <strong>substantially conformant</strong> — it meets the standard with the
+        known exceptions listed below.
+      </p>
+
+      <h2>What we've implemented</h2>
+      <ul>
+        <li><strong>Keyboard navigation</strong> — every interactive element is reachable and operable by keyboard. The mobile menu traps focus while open, closes on <code>Esc</code>, and returns focus to the button that opened it.</li>
+        <li><strong>Visible focus</strong> — a high-contrast green focus ring on every focusable element. We never remove outlines without replacing them.</li>
+        <li><strong>Skip link</strong> — "Skip to content" is the first focusable item on every page.</li>
+        <li><strong>Semantic structure</strong> — one <code>h1</code> per page, correct heading order, real landmarks, lists marked up as lists.</li>
+        <li><strong>Contrast</strong> — body text and UI controls meet or exceed 4.5:1; large text meets 3:1.</li>
+        <li><strong>Reduced motion</strong> — every scroll animation, the pinned horizontal rails, and all transitions are disabled when the OS reports <code>prefers-reduced-motion: reduce</code>. Rails become a plain vertical stack with identical content.</li>
+        <li><strong>Works without JavaScript</strong> — all content is in the static HTML. If scripts fail, nothing is left invisible and the rails render as a normal stacked grid.</li>
+        <li><strong>Touch targets</strong> — interactive elements are at least 44&times;44 CSS pixels.</li>
+        <li><strong>Forms</strong> — every input has a persistent visible label, errors are announced via <code>aria-live</code>, and invalid fields are identified by text rather than colour alone.</li>
+        <li><strong>Zoom and reflow</strong> — content reflows to a single column at 320&nbsp;px and supports 200% zoom without horizontal scrolling.</li>
+        <li><strong>Meaningful alternatives</strong> — decorative graphics are <code>aria-hidden</code>; the analytics chart carries a descriptive text alternative.</li>
+      </ul>
+
+      <h2>Known limitations</h2>
+      <ul>
+        <li>The pinned horizontal service and testimonial rails use scroll-driven motion on screens wider than 900&nbsp;px. On narrower screens, and with reduced motion enabled, they render as a plain vertical stack with identical content and no motion.</li>
+        <li>Data tables in the client portal scroll horizontally inside their own container on very narrow screens. The page itself never scrolls sideways.</li>
+      </ul>
+
+      <h2>How we test</h2>
+      <ul>
+        <li>Keyboard-only walkthrough of every page and flow before release.</li>
+        <li>Automated audits with Lighthouse and axe DevTools on each deploy.</li>
+        <li>Screen reader spot checks with VoiceOver (macOS/iOS) and NVDA (Windows).</li>
+        <li>Manual checks at 320&nbsp;px width, 200% zoom, and with reduced motion enabled.</li>
+      </ul>
+
+      <h2>Tell us if we've missed something</h2>
+      <p>
+        If you encounter a barrier on this site, we want to know. Email
+        <a href="mailto:cwostrategygroup@gmail.com?subject=Accessibility%20feedback">cwostrategygroup@gmail.com</a>
+        with the page address and what went wrong. We aim to acknowledge within
+        two business days and to fix confirmed barriers within 10 business days,
+        or explain why longer is needed.
+      </p>
+
+      <h2>Accessibility on client work</h2>
+      <p>
+        Every site we build is developed to the same standard. Accessibility is
+        included in the base scope, not sold as an upgrade — it's cheaper to build
+        in than to retrofit, and it's the right thing to do.
+      </p>
+
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <a class="brand" href="index.html" aria-label="CWO Strategy Group — home">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><defs><linearGradient id="bmXF" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3ddc97"/><stop offset="100%" stop-color="#4d8dff"/></linearGradient></defs><path d="M42 20a15 15 0 1 0 0 24" fill="none" stroke="url(#bmXF)" stroke-width="7" stroke-linecap="round"/><rect x="44" y="38" width="7" height="7" rx="1.5" fill="#3ddc97"/></svg>
+          </span>
+          <span class="brand__txt">Strategy Group</span>
+        </a>
+        <p>
+          Web design, website management, and SEO for small and mid-sized
+          businesses. Columbus, Ohio — working nationwide.
+        </p>
+      </div>
+
+      <div>
+        <h4>Services</h4>
+        <ul>
+          <li><a href="index.html#services">Website Creation</a></li>
+          <li><a href="index.html#services">Website Management</a></li>
+          <li><a href="index.html#services">SEO &amp; AEO</a></li>
+          <li><a href="index.html#process">Our Process</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="testimonials.html">Testimonials</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+          <li><a href="start-a-project.html">Start a Project</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Clients</h4>
+        <ul>
+          <li><a href="login.html">Client Login</a></li>
+          <li><a href="reset-password.html">Reset Password</a></li>
+          <li><a href="mailto:cwostrategygroup@gmail.com">cwostrategygroup@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot__bar">
+      <p>&copy; <span data-year>2026</span> CWO Strategy Group, LLC. All rights reserved.</p>
+      <ul class="foot__legal">
+        <li><a href="privacy-policy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+        <li><a href="accessibility.html">Accessibility</a></li>
+        <li><a href="sitemap.xml">Sitemap</a></li>
+      </ul>
+      <span class="foot__status"><span class="dot" aria-hidden="true"></span>Columbus, OH</span>
+    </div>
+  </div>
+</footer>
+
+<script src="scroll.js" defer></script>
+</body>
+</html>

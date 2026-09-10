@@ -1,0 +1,34 @@
+{
+  "name": "CWO Strategy Group",
+  "short_name": "CWO Strategy",
+  "description": "Web design, website management, and SEO for small and mid-sized businesses. Columbus, Ohio — working nationwide.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07090c",
+  "theme_color": "#07090c",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start a project",
+      "short_name": "New project",
+      "url": "/start-a-project.html"
+    },
+    {
+      "name": "Client login",
+      "short_name": "Login",
+      "url": "/login.html"
+    }
+  ]
+}
