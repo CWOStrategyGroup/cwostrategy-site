@@ -6,11 +6,13 @@
 <meta name="theme-color" content="#07090c">
 
 <title>Client Login | CWO Strategy Group</title>
-<meta name="description" content="Secure client login for CWO Strategy Group. View your website analytics, track requests, and submit changes from one dashboard.">
+<meta name="description" content="Secure passwordless sign-in to the CWO Strategy Group client portal. View live site analytics and track your change requests.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png" sizes="820x818">
+<link rel="apple-touch-icon" href="favicon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -62,19 +64,7 @@
       View live analytics for your site, track open requests, and send us changes.
     </p>
 
-    <!--
-      SERVER CONTRACT — POST /api/auth/login (HTTPS, same origin)
-        • Verify _csrf against the session cookie; reject on mismatch.
-        • Rate limit 5 attempts / 15 min per IP AND per email.
-        • Argon2id verify, constant-time; identical error for bad email vs bad password.
-        • On success rotate the session id and set cwo_session
-          (HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=43200).
-        • Never trust a hidden field for identity or role.
-    -->
-    <form class="form" data-validate method="post" action="#" style="margin-top:1.8rem" novalidate
-          data-success="Demo build — no authentication server is connected yet. Use the demo dashboard link below.">
-
-      <input type="hidden" name="_csrf" value="SERVER_RENDERS_CSRF_TOKEN">
+    <form class="form" id="loginForm" novalidate style="margin-top:1.8rem">
 
       <div class="hp" aria-hidden="true">
         <label for="company_url">Company URL</label>
@@ -92,34 +82,19 @@
         <span class="err" aria-live="polite"></span>
       </div>
 
-      <div class="field">
-        <label for="password">Password <span class="req" aria-hidden="true">*</span></label>
-        <div style="position:relative">
-          <input class="input" id="password" name="password" type="password" required
-                 autocomplete="current-password" minlength="12" maxlength="128"
-                 style="padding-right:4.2rem" placeholder="••••••••••••">
-          <button type="button" data-pw-toggle="password"
-                  style="position:absolute;right:.4rem;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--text-faint);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;padding:.5rem;min-height:40px"
-                  aria-label="Show password" aria-pressed="false">SHOW</button>
-        </div>
-        <span class="err" aria-live="polite"></span>
-      </div>
-
-      <label class="check">
-        <input type="checkbox" name="remember" value="1">
-        <span>Keep me signed in on this device for 30 days</span>
-      </label>
-
-      <button class="btn btn--primary btn--wide" type="submit">Sign in <span class="arrow">&rarr;</span></button>
+      <button class="btn btn--primary btn--wide" type="submit" id="loginBtn">
+        Email me a sign-in link <span class="arrow">&rarr;</span>
+      </button>
 
       <p class="form__note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-        Encrypted over TLS. Passwords are stored as salted Argon2id hashes and are never visible to us.
+        Passwordless by design. We send a one-time link that signs you in and
+        expires shortly after. There is no password to guess, leak, or reset.
       </p>
     </form>
 
     <div class="auth__foot">
-      <p style="margin-bottom:.6rem"><a href="reset-password.html">Forgot your password?</a></p>
+      <p style="margin-bottom:.6rem"><a href="reset-password.html">Didn’t get your link?</a></p>
       <p style="margin-bottom:.6rem">Not a client yet? <a href="start-a-project.html">Start a project</a>.</p>
       <p style="margin:0">
         Trouble signing in? Email
@@ -127,10 +102,6 @@
       </p>
     </div>
 
-    <p style="margin-top:1.3rem;font-family:var(--font-mono);font-size:.72rem;color:var(--text-faint)">
-      Previewing the build?
-      <a href="portal.html?demo=1" style="color:var(--term)">Open the demo dashboard &rarr;</a>
-    </p>
   </div>
 </section>
 
@@ -152,5 +123,7 @@
 </footer>
 
 <script src="scroll.js" defer></script>
+<script src="auth.js" defer></script>
+<script src="login.js" defer></script>
 </body>
 </html>

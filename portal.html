@@ -6,11 +6,13 @@
 <meta name="theme-color" content="#07090c">
 
 <title>Client Dashboard | CWO Strategy Group</title>
-<meta name="description" content="CWO Strategy Group client dashboard — website analytics, keyword rankings, site health, and change requests.">
+<meta name="description" content="CWO Strategy Group client dashboard: live website analytics, traffic sources, top pages, and change request tracking.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png" sizes="820x818">
+<link rel="apple-touch-icon" href="favicon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -56,12 +58,12 @@
   <div class="portal__head" id="overview">
     <div>
       <p class="eyebrow" style="margin-bottom:.5rem">Client dashboard</p>
-      <h1>Welcome back, <span data-user-name>M &amp; S Bakery (DEMO: Not Real Statistics)</span>.</h1>
+      <h1>Welcome back, <span data-user-name>—</span>.</h1>
     </div>
     <div style="text-align:right">
       <p class="portal__who" style="margin:0">
-        <span data-user-email>owner@msbakery.com</span><br>
-        Property: <span data-property>msbakery.com</span>
+        <span data-user-email>—</span><br>
+        Property: <span data-property>—</span>
       </p>
       <div class="btn-row" style="margin-top:.7rem;justify-content:flex-end">
         <a class="btn btn--ghost btn--sm" href="#requests">New request</a>
@@ -70,36 +72,21 @@
     </div>
   </div>
 
-  <div class="alert alert--ok is-shown" data-demo-banner style="margin-bottom:2rem">
-    <strong>Demo data.</strong> This is a design preview. Once
-    <code>/api/portal/summary</code> is live, real figures load in place of these.
-  </div>
+  <div class="alert" role="status" data-status style="margin-bottom:2rem"></div>
 
   <!-- ------------------------------ KPIs ------------------------------ -->
   <section aria-labelledby="kpiH" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
-    <h2 id="kpiH" class="updated" style="margin-bottom:1rem">Last 30 days</h2>
-    <div class="kpis">
-      <div class="kpi reveal">
-        <div class="kpi__k">Visitors</div>
-        <div class="kpi__v"><span data-count="4820">0</span></div>
-        <div class="kpi__d up">&uarr; 18.4% vs. prior 30 days</div>
-      </div>
-      <div class="kpi reveal" style="--d:1">
-        <div class="kpi__k">Organic sessions</div>
-        <div class="kpi__v"><span data-count="3117">0</span></div>
-        <div class="kpi__d up">&uarr; 26.1%</div>
-      </div>
-      <div class="kpi reveal" style="--d:2">
-        <div class="kpi__k">Calls &amp; form leads</div>
-        <div class="kpi__v"><span data-count="64">0</span></div>
-        <div class="kpi__d up">&uarr; 9 vs. prior period</div>
-      </div>
-      <div class="kpi reveal" style="--d:3">
-        <div class="kpi__k">Avg. load time</div>
-        <div class="kpi__v"><span data-count="0.9" data-suffix="s">0</span></div>
-        <div class="kpi__d up">&darr; 0.3s faster</div>
-      </div>
+    <h2 id="kpiH" class="updated" style="margin-bottom:1rem">
+      Last 30 days <span data-range style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-faint);letter-spacing:.08em"></span>
+    </h2>
+    <div class="kpis" data-kpis>
+      <div class="kpi"><div class="kpi__k">Pageviews</div><div class="kpi__v">&mdash;</div><div class="kpi__d"></div></div>
+      <div class="kpi"><div class="kpi__k">Visits</div><div class="kpi__v">&mdash;</div><div class="kpi__d"></div></div>
+      <div class="kpi"><div class="kpi__k">Pages per visit</div><div class="kpi__v">&mdash;</div><div class="kpi__d"></div></div>
     </div>
+    <p style="margin-top:.8rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text-faint)">
+      Source: <span data-source>Cloudflare Web Analytics</span> &middot; privacy-first, no cookies, no cross-site tracking.
+    </p>
   </section>
 
   <!-- ----------------------------- TRAFFIC ---------------------------- -->
@@ -134,13 +121,7 @@
       <div class="table-scroll">
         <table class="tbl">
           <thead><tr><th scope="col">Page</th><th scope="col">Views</th><th scope="col">Avg. time</th></tr></thead>
-          <tbody>
-            <tr><td>/</td><td>2,041</td><td>1m 12s</td></tr>
-            <tr><td>/menu</td><td>1,388</td><td>2m 04s</td></tr>
-            <tr><td>/order</td><td>702</td><td>1m 47s</td></tr>
-            <tr><td>/hours-location</td><td>498</td><td>0m 51s</td></tr>
-            <tr><td>/catering</td><td>191</td><td>1m 33s</td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
@@ -150,13 +131,7 @@
       <div class="table-scroll">
         <table class="tbl">
           <thead><tr><th scope="col">Source</th><th scope="col">Sessions</th><th scope="col">Share</th></tr></thead>
-          <tbody>
-            <tr><td>Google organic</td><td>3,117</td><td>64.7%</td></tr>
-            <tr><td>Google Maps</td><td>812</td><td>16.8%</td></tr>
-            <tr><td>Direct</td><td>544</td><td>11.3%</td></tr>
-            <tr><td>Instagram</td><td>241</td><td>5.0%</td></tr>
-            <tr><td>AI assistants</td><td>106</td><td>2.2%</td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
@@ -166,7 +141,17 @@
   <section aria-labelledby="kwH" id="keywords" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
     <h2 id="kwH" class="updated" style="margin-bottom:1rem">Keyword positions</h2>
     <div class="chart reveal">
-      <div class="table-scroll">
+      <div data-keywords-empty>
+        <p style="color:var(--text-dim);margin:0 0 .4rem">
+          Rank tracking isn’t connected to this dashboard yet.
+        </p>
+        <p style="color:var(--text-faint);font-size:.88rem;margin:0">
+          Cloudflare Web Analytics measures traffic, not search positions. We report
+          your rankings manually in your monthly summary until a rank-tracking
+          source is wired in here.
+        </p>
+      </div>
+      <div class="table-scroll" data-keywords-table hidden>
         <table class="tbl">
           <thead>
             <tr>
@@ -176,13 +161,7 @@
               <th scope="col">Monthly volume</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td>bakery columbus ohio</td><td>3</td><td>&uarr; 4</td><td>2,400</td></tr>
-            <tr><td>fresh bread near me</td><td>5</td><td>&uarr; 2</td><td>1,900</td></tr>
-            <tr><td>custom cakes columbus</td><td>7</td><td>&uarr; 6</td><td>880</td></tr>
-            <tr><td>catering bakery ohio</td><td>11</td><td>&uarr; 1</td><td>590</td></tr>
-            <tr><td>gluten free bakery columbus</td><td>14</td><td>&mdash;</td><td>420</td></tr>
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
@@ -191,27 +170,14 @@
   <!-- --------------------------- SITE HEALTH -------------------------- -->
   <section aria-labelledby="healthH" id="health" style="margin-bottom:clamp(2rem,5vh,3.5rem)">
     <h2 id="healthH" class="updated" style="margin-bottom:1rem">Site health</h2>
-    <div class="grid grid--4">
-      <div class="kpi reveal">
-        <div class="kpi__k">Uptime (30d)</div>
-        <div class="kpi__v"><span data-count="99.98" data-suffix="%">0</span></div>
-        <div class="kpi__d up">No incidents</div>
-      </div>
-      <div class="kpi reveal" style="--d:1">
-        <div class="kpi__k">Largest Contentful Paint</div>
-        <div class="kpi__v"><span data-count="1.1" data-suffix="s">0</span></div>
-        <div class="kpi__d up">Good &mdash; under 2.5s</div>
-      </div>
-      <div class="kpi reveal" style="--d:2">
-        <div class="kpi__k">Cumulative Layout Shift</div>
-        <div class="kpi__v"><span data-count="0.01">0</span></div>
-        <div class="kpi__d up">Good &mdash; under 0.1</div>
-      </div>
-      <div class="kpi reveal" style="--d:3">
-        <div class="kpi__k">Broken links</div>
-        <div class="kpi__v"><span data-count="0">0</span></div>
-        <div class="kpi__d up">Last crawled today</div>
-      </div>
+    <div class="chart reveal">
+      <p style="color:var(--text-dim);margin:0 0 .4rem">
+        Uptime and Core Web Vitals monitoring isn’t connected to this dashboard yet.
+      </p>
+      <p style="color:var(--text-faint);font-size:.88rem;margin:0">
+        We monitor these on our side and raise anything that needs your attention
+        directly. Live figures will appear here once monitoring is wired in.
+      </p>
     </div>
   </section>
 
@@ -231,12 +197,7 @@
                 <th scope="col">Submitted</th><th scope="col">Status</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td>#1042</td><td>Update holiday hours</td><td>2 days ago</td><td><span class="tag tag--prog">In progress</span></td></tr>
-              <tr><td>#1039</td><td>Add three menu photos</td><td>6 days ago</td><td><span class="tag tag--done">Done</span></td></tr>
-              <tr><td>#1036</td><td>New catering page</td><td>2 weeks ago</td><td><span class="tag tag--done">Done</span></td></tr>
-              <tr><td>#1031</td><td>Fix contact form spam</td><td>3 weeks ago</td><td><span class="tag tag--done">Done</span></td></tr>
-            </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </div>
@@ -245,13 +206,12 @@
         <h3 style="font-size:1.02rem">Submit a change</h3>
 
         <!--
-          POST /api/portal/requests
-          The body carries NO account_id or property_id. The server derives
-          both from the session. That is what makes field tampering useless.
+          Calls the submit_portal_request() RPC. The body carries NO client_id:
+          the database derives it from the verified auth.uid(), which is what
+          makes field tampering useless.
         -->
-        <form class="form" data-validate method="post" action="#" novalidate
-              data-success="Request received. You'll get an email confirmation and it'll appear in the table within a minute.">
-          <input type="hidden" name="_csrf" value="SERVER_RENDERS_CSRF_TOKEN">
+        <form class="form" data-portal-request method="post" novalidate
+              data-success="Request received.">
 
           <div class="hp" aria-hidden="true">
             <label for="company_url">Company URL</label>
@@ -330,6 +290,8 @@
 </footer>
 
 <script src="scroll.js" defer></script>
+<script src="auth.js" defer></script>
+<script src="forms.js" defer></script>
 <script src="portal.js" defer></script>
 </body>
 </html>

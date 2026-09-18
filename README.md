@@ -1,11 +1,41 @@
-# CWO Strategy Group — Site v4
+# CWO Strategy Group — Site v5
 
 Static site. **Zero dependencies. Zero CDN requests. No build step.**
 Drop these files in one flat folder and it works.
 
 ---
 
-## 1. What changed in v4
+## 1. What changed in v5
+
+The client portal is now real, and several things that looked finished were not.
+
+**Fixed**
+- **Favicon was 404ing on every page.** Every page linked a `favicon.svg` that
+  did not exist in the repo — only `favicon.png` did. Created the missing
+  `favicon.svg` from the brand mark, with `favicon.png` as raster fallback.
+- **Duplicate social tags.** `index.html` had two conflicting `og:title`,
+  `og:description`, `og:url` and `twitter:card` blocks, one pasted above
+  `<meta charset>`. Scrapers take the first match, so the weaker generic copy is
+  what actually appeared in shares. Now one clean block per page.
+- **Missing share images.** Only the homepage had `og:image`. Every public page
+  now has full Open Graph and `summary_large_image` Twitter tags.
+- **`<meta charset>` was ~18 lines into `<head>`.** Now the first element.
+- **The lead form silently discarded every submission.** It posted to
+  `action="#"`, which hit a demo handler that showed a success message and threw
+  the data away. It now posts to a real endpoint.
+- **Privacy policy described practices that no longer exist** — Argon2id
+  hashing, session cookies, CSRF cookies, AES-256-GCM field encryption. Rewritten
+  to match what the site actually does.
+- **`netlify.toml` was dead config.** The origin is GitHub Pages, which ignores
+  it, so the site was serving no security headers at all. See `SECURITY.md`.
+
+**Added**
+- Passwordless magic-link sign-in (`auth.js`, `login.js`).
+- Live client dashboard backed by Cloudflare Web Analytics.
+- Postgres row-level security with a verified cross-tenant attack test.
+- Lead capture with honeypot, timing floor, and per-IP rate limiting.
+
+## 2. What changed in v4
 
 Two fixes only. Everything else from v3 is unchanged.
 
@@ -60,8 +90,15 @@ accessibility.html      WCAG 2.1 AA statement
 styles.css              Entire design system
 scroll.js               Scroll engine + nav + forms
 portal.js               Dashboard logic
+auth.js                 Supabase auth client (no dependencies)
+login.js                Magic-link sign-in
+forms.js                Real form submission
+_headers                Portable header config
+SECURITY.md             Security model + setup steps  <-- READ THIS
 
-favicon.svg             Brand mark
+favicon.svg             Brand mark (vector, all sizes)
+favicon.png             Raster fallback + apple-touch-icon + JSON-LD logo
+og-image.png            Social share card (1200x630)
 site.webmanifest        PWA manifest
 robots.txt              Crawler rules + AI allowlist
 sitemap.xml             Indexable pages
@@ -70,10 +107,10 @@ netlify.toml            Headers, HTTPS, redirects, caching
 README.md               This file
 ```
 
-**20 files.** If a file isn't on this list, you don't need it.
+If a file isn't on this list, you don't need it.
 
-Unchanged from v3 and safe to keep as-is: `portal.js`, `favicon.svg`,
-`site.webmanifest`, `robots.txt`, `sitemap.xml`, `llms.txt`, `netlify.toml`.
+`netlify.toml` is retained for portability but is **not in effect** on the
+current host. See `SECURITY.md`.
 
 ---
 
@@ -169,19 +206,25 @@ wired into every form.
 
 ## 8. Pre-launch checklist
 
-- [ ] Add a real phone number to the nav drawer and footer, or leave email only
-- [ ] Replace `SERVER_RENDERS_CSRF_TOKEN` in `login.html`, `reset-password.html`,
-      and `portal.html` with a real server-rendered token
-- [ ] Point the four forms at a real endpoint
+Handled in v5:
+
+- [x] Replace the `SERVER_RENDERS_CSRF_TOKEN` placeholders — removed; the portal
+      no longer uses cookie sessions or CSRF tokens
+- [x] Point the forms at a real endpoint
+- [x] Add an OG share image and the `og:image` tags
+- [x] Fix the favicon
+
+Still on you:
+
+- [ ] **Apply the Cloudflare security headers** — see `SECURITY.md` §1. The site
+      currently serves none.
+- [ ] **Set `CF_API_TOKEN`, `CF_ACCOUNT_ID`, `LEAD_IP_SALT`** — see `SECURITY.md` §2.
+      The portal shows no analytics until these exist.
 - [ ] Create and verify a **Google Business Profile** — the single biggest local
       ranking factor, and nothing in this repo substitutes for it
 - [ ] Submit `sitemap.xml` in Google Search Console and Bing Webmaster Tools
-- [ ] Add an OG share image at `/assets/og-cover.jpg` (1200×630) and add the
-      `og:image` tags if you want rich link previews
-- [ ] Run Lighthouse — should score 100 across the board
-- [ ] Test the rail on a real desktop and the drawer on a real phone
+- [ ] Add a real phone number to the nav drawer and footer, or leave email only
 
----
 
 ## 9. Making changes
 

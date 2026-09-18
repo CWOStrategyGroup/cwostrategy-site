@@ -6,17 +6,54 @@
 <meta name="theme-color" content="#07090c">
 
 <title>Privacy Policy | CWO Strategy Group</title>
-<meta name="description" content="How CWO Strategy Group collects, uses, stores, and protects your information. Plain-language privacy policy covering forms, analytics, cookies, portal data, and your GDPR and CCPA rights.">
+<meta name="description" content="How CWO Strategy Group collects, uses, stores, and protects your information, including client portal data and analytics.">
 <link rel="canonical" href="https://cwostrategy.com/privacy-policy.html">
 <meta name="robots" content="index, follow">
 
+
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="CWO Strategy Group">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="Privacy Policy | CWO Strategy Group">
+<meta property="og:description" content="How CWO Strategy Group collects, uses, stores, and protects your information, including client portal data and analytics.">
 <meta property="og:url" content="https://cwostrategy.com/privacy-policy.html">
+<meta property="og:image" content="https://cwostrategy.com/og-image.png">
+<meta property="og:image:secure_url" content="https://cwostrategy.com/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="CWO Strategy Group — web design, website management, and SEO.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Privacy Policy | CWO Strategy Group">
+<meta name="twitter:description" content="How CWO Strategy Group collects, uses, stores, and protects your information, including client portal data and analytics.">
+<meta name="twitter:image" content="https://cwostrategy.com/og-image.png">
+<meta name="twitter:image:alt" content="CWO Strategy Group — web design, website management, and SEO.">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png" sizes="820x818">
+<link rel="apple-touch-icon" href="favicon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://cwostrategy.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Privacy Policy",
+      "item": "https://cwostrategy.com/privacy-policy.html"
+    }
+  ]
+}
+</script>
 </head>
 
 <body>
@@ -110,14 +147,14 @@
       <ul>
         <li><strong>Consultation form</strong> — name, email, phone (optional), business name, current website (optional), budget range, and your project description.</li>
         <li><strong>Email and phone</strong> — whatever you choose to send, plus your address or number.</li>
-        <li><strong>Client portal accounts</strong> — name, work email, a hashed password, and the change requests you submit.</li>
+        <li><strong>Client portal accounts</strong> — your name, work email, and the change requests you submit. No password is collected or stored.</li>
       </ul>
 
       <h3>Information collected automatically</h3>
       <ul>
         <li><strong>Server logs</strong> — IP address, user agent, referring page, requested URL, timestamp. Used for security, rate limiting, and abuse prevention. IP addresses are stored hashed.</li>
-        <li><strong>Essential cookies</strong> — a session cookie when you log into the portal, and a CSRF token cookie on forms.</li>
-        <li><strong>Aggregate analytics</strong> — page views and referrers. See <a href="#cookies">section 4</a>.</li>
+        <li><strong>No cookies</strong> — this site sets none. Portal sign-in uses tab-scoped browser storage instead.</li>
+        <li><strong>Aggregate analytics</strong> — cookieless page views and referring domains via Cloudflare Web Analytics. See <a href="#cookies">section 4</a>.</li>
       </ul>
 
       <h3>What we do not collect</h3>
@@ -142,27 +179,39 @@
 
       <h2 id="cookies">4. Cookies and analytics</h2>
       <p>
-        We use a small number of strictly necessary cookies and no advertising
-        cookies at all:
+        <strong>This site sets no cookies at all.</strong> We use no advertising
+        cookies, no analytics cookies, and no session cookies.
       </p>
-      <ul>
-        <li><code>cwo_session</code> — identifies your portal session. HttpOnly, Secure, SameSite=Lax. Expires after 12 hours.</li>
-        <li><code>cwo_csrf</code> — a token that proves a form submission came from our site. Session-length.</li>
-      </ul>
       <p>
-        Analytics are aggregate and privacy-respecting: we record page views and
-        referrers without cookies, cross-site identifiers, or fingerprinting. We
-        cannot single you out from analytics data.
+        When you sign in to the client portal, your sign-in token is held in your
+        browser&rsquo;s <code>sessionStorage</code> rather than a cookie. It is
+        scoped to that one browser tab and is discarded when you close it. It is
+        never sent to any site other than our authentication provider.
+      </p>
+      <p>
+        Traffic analytics come from <strong>Cloudflare Web Analytics</strong>,
+        which is cookieless by design. It records page views and referring
+        domains in aggregate, without cross-site identifiers, device
+        fingerprinting, or any profile of an individual visitor. We cannot single
+        you out from analytics data, and neither can we reconstruct your browsing
+        history from it.
       </p>
 
       <h2 id="portal">5. Client portal data</h2>
       <p>
         Managed clients get a portal account showing analytics for their own
-        website. Passwords are stored as salted Argon2id hashes — we cannot read
-        them and will never ask you for one. All portal data is scoped to your
-        account on the server; identity is derived from your session, never from
-        anything the browser sends. Editing a hidden field, a cookie, or a request
-        body cannot reach another client's data.
+        website. <strong>The portal is passwordless.</strong> We do not create,
+        store, or transmit a password for you; you sign in with a single-use link
+        sent to your email address, which expires shortly after it is issued.
+        There is no password for us to leak and none for you to reuse.
+      </p>
+      <p>
+        All portal data is scoped to your account inside the database itself,
+        using row-level security. Your identity is derived from your verified
+        sign-in token on the server, never from anything your browser sends.
+        Editing a hidden field, a stored token, or a request body cannot reach
+        another client&rsquo;s data. Accounts are created by us on request; the
+        portal has no public sign-up.
       </p>
 
       <h2 id="share">6. Who we share it with</h2>
@@ -171,9 +220,10 @@
         minimum each one needs:
       </p>
       <ul>
-        <li><strong>Hosting and CDN</strong> — serves the site and stores server logs.</li>
-        <li><strong>Email provider</strong> — delivers our replies and your password reset links.</li>
-        <li><strong>Analytics provider</strong> — aggregate traffic figures only.</li>
+        <li><strong>GitHub Pages</strong> — serves the static website files.</li>
+        <li><strong>Cloudflare</strong> — CDN, DNS, TLS, and cookieless Web Analytics.</li>
+        <li><strong>Supabase</strong> — database, authentication, and client portal data. Hosted in Canada (ca-central-1).</li>
+        <li><strong>Email provider</strong> — delivers our replies and your one-time sign-in links.</li>
       </ul>
       <p>
         We may also disclose information where we are legally required to, or to
@@ -192,13 +242,15 @@
 
       <h2 id="security">8. How we protect it</h2>
       <ul>
-        <li>HTTPS enforced everywhere, with HSTS.</li>
-        <li>Argon2id password hashing; passwords are never stored or logged in readable form.</li>
-        <li>Session cookies are HttpOnly, Secure, SameSite, and rotated on sign-in.</li>
-        <li>CSRF tokens on every state-changing request.</li>
-        <li>Rate limiting and bot filtering on all public forms.</li>
-        <li>Sensitive free-text fields encrypted at rest with AES-256-GCM.</li>
-        <li>Least-privilege database access and parameterized queries throughout.</li>
+        <li>HTTPS enforced everywhere, with HSTS and TLS terminated at Cloudflare.</li>
+        <li><strong>No passwords exist.</strong> Sign-in is a single-use emailed link, so there is no password to steal, reuse, or leak.</li>
+        <li>Sign-in tokens are short-lived, tab-scoped, and never written to a cookie or to long-term browser storage.</li>
+        <li>Every client record is isolated by database row-level security, enforced by the database itself rather than by application code.</li>
+        <li>The public API key used by the browser grants no data access on its own; reading anything requires a verified sign-in.</li>
+        <li>Rate limiting, honeypot fields, and timing checks on all public forms.</li>
+        <li>Visitor IP addresses are stored only as salted hashes, never in raw form.</li>
+        <li>Data is encrypted in transit and at rest by our database provider.</li>
+        <li>Least-privilege database roles and parameterized queries throughout.</li>
       </ul>
       <p>
         No system is perfectly secure. If a breach ever affects your data, we will
@@ -291,7 +343,7 @@
         <h4>Clients</h4>
         <ul>
           <li><a href="login.html">Client Login</a></li>
-          <li><a href="reset-password.html">Reset Password</a></li>
+          <li><a href="reset-password.html">Sign-in help</a></li>
           <li><a href="mailto:cwostrategygroup@gmail.com">cwostrategygroup@gmail.com</a></li>
         </ul>
       </div>
