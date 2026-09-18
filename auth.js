@@ -85,18 +85,24 @@
 
   /* ---------------------------------------------- magic link (sign in) */
   function sendMagicLink(email) {
-    return api('/auth/v1/otp', {
+    /* The redirect MUST travel as a query parameter. GoTrue ignores any
+       redirect passed in the request body, and silently falls back to the
+       project's Site URL — which is how a sign-in link ends up on the
+       homepage instead of the portal. */
+    var path = '/auth/v1/otp?redirect_to=' + encodeURIComponent(CONFIG.redirectTo);
+
+    return api(path, {
       method: 'POST',
       body: {
         email: String(email || '').trim().toLowerCase(),
         // Closed signup: an address with no account will NOT be created.
-        create_user: false,
-        options: { email_redirect_to: CONFIG.redirectTo }
+        create_user: false
       }
     }).then(function (res) {
       if (res.ok) return { ok: true };
       if (res.status === 429) {
-        return { ok: false, reason: 'rate', message: 'Too many attempts. Wait a minute and try again.' };
+        return { ok: false, reason: 'rate',
+                 message: 'Too many sign-in emails requested. Please wait a few minutes and try again.' };
       }
       return res.json().catch(function () { return {}; }).then(function (b) {
         return { ok: false, reason: 'error', message: (b && (b.msg || b.error_description || b.message)) || null };
