@@ -1,8 +1,6 @@
 # CWO Strategy Group: search engines and AI answer engines are welcome.
 User-agent: *
 Allow: /
-Disallow: /login.html
-Disallow: /reset-password.html
 
 User-agent: GPTBot
 Allow: /
