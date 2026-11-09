@@ -131,7 +131,7 @@
     if (!validate()) { show('bad', 'Please fix the highlighted fields.'); return; }
 
     // Field names match the submit-lead edge function: name, email, phone,
-    // company, website, budget, services, message, company_url (honeypot).
+    // company, website, budget, services, message, hp_check (honeypot).
     var services = Array.prototype.slice.call(form.querySelectorAll('input[name="services"]:checked'))
       .map(function (i) { return i.value; }).join(', ');
     var payload = {
@@ -143,7 +143,7 @@
       budget: form.budget.value,
       services: services,
       message: form.message.value,
-      company_url: form.company_url.value,
+      hp_check: form.hp_check.value,
       elapsed_ms: Date.now() - loadedAt,
       source_page: location.pathname
     };
